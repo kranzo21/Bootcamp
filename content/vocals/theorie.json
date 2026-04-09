@@ -1,0 +1,50 @@
+[
+  {
+    "id": "voc-theorie-1",
+    "titel": "Stimmbildung und Technik",
+    "videos": [
+      {
+        "titel": "Gesangstechnik Grundlagen",
+        "url": "https://www.youtube.com/embed/PLACEHOLDER5"
+      }
+    ],
+    "texte": [
+      {
+        "titel": "Atmung und Stütze",
+        "inhalt": "Hier kommt der Text über Atemtechnik für Sänger. Dieser Platzhalter wird durch den echten Inhalt ersetzt."
+      }
+    ],
+    "fragen": [
+      {
+        "frage": "Welcher Atemtyp ist für Sänger empfohlen?",
+        "optionen": [
+          "Brustatmung",
+          "Zwerchfellatmung",
+          "Schulterkrampf",
+          "Keine Technik nötig"
+        ],
+        "richtig": 1
+      },
+      {
+        "frage": "Was schützt die Stimme vor Überbelastung?",
+        "optionen": [
+          "Schreien",
+          "Richtige Technik und Aufwärmen",
+          "Ignorieren",
+          "Nur leise singen"
+        ],
+        "richtig": 1
+      },
+      {
+        "frage": "Was ist ein Warm-up?",
+        "optionen": [
+          "Eine Pause",
+          "Aufwärmübungen für die Stimme",
+          "Ein Lied",
+          "Eine Pause"
+        ],
+        "richtig": 1
+      }
+    ]
+  }
+]

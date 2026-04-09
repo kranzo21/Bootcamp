@@ -1,0 +1,45 @@
+[
+  {
+    "id": "inst-theorie-1",
+    "titel": "Grundlagen der Musiktheorie",
+    "videos": [
+      {
+        "titel": "Noten und Rhythmus",
+        "url": "https://www.youtube.com/embed/PLACEHOLDER3"
+      }
+    ],
+    "texte": [
+      {
+        "titel": "Noten lesen",
+        "inhalt": "Hier kommt der Text über das Notenlesen für Instrumentalisten. Dieser Platzhalter wird durch den echten Inhalt ersetzt."
+      }
+    ],
+    "fragen": [
+      {
+        "frage": "Wie viele Halbtöne hat eine Oktave?",
+        "optionen": ["8", "10", "12", "7"],
+        "richtig": 2
+      },
+      {
+        "frage": "Was ist ein Takt?",
+        "optionen": [
+          "Eine Melodie",
+          "Eine rhythmische Einheit",
+          "Ein Instrument",
+          "Eine Tonart"
+        ],
+        "richtig": 1
+      },
+      {
+        "frage": "Was bedeutet 4/4-Takt?",
+        "optionen": [
+          "4 Melodien pro Lied",
+          "4 Viertelnoten pro Takt",
+          "4 Instrumente",
+          "4 Strophen"
+        ],
+        "richtig": 1
+      }
+    ]
+  }
+]

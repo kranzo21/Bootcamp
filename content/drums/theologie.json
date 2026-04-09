@@ -1,0 +1,50 @@
+[
+  {
+    "id": "drm-theo-1",
+    "titel": "Rhythmus als Gottesgeschenk",
+    "videos": [
+      {
+        "titel": "Schlagzeug im Gottesdienst",
+        "url": "https://www.youtube.com/embed/PLACEHOLDER6"
+      }
+    ],
+    "texte": [
+      {
+        "titel": "Die Rolle des Schlagzeugers",
+        "inhalt": "Hier kommt der Text über die Rolle des Schlagzeugers im Lobpreis. Dieser Platzhalter wird durch den echten Inhalt ersetzt."
+      }
+    ],
+    "fragen": [
+      {
+        "frage": "Was ist die Hauptaufgabe des Schlagzeugers im Gottesdienst?",
+        "optionen": [
+          "Solos spielen",
+          "Die Band rhythmisch zusammenhalten",
+          "Lautstärke erzeugen",
+          "Aufmerksamkeit bekommen"
+        ],
+        "richtig": 1
+      },
+      {
+        "frage": "Warum ist Disziplin für Schlagzeuger besonders wichtig?",
+        "optionen": [
+          "Weil Drums laut sind",
+          "Weil Rhythmus die Basis für alle anderen Musiker ist",
+          "Wegen der Ausrüstung",
+          "Wegen des Platzes"
+        ],
+        "richtig": 1
+      },
+      {
+        "frage": "Was bedeutet 'im Dienst spielen'?",
+        "optionen": [
+          "Für sich selbst spielen",
+          "Dem Team und der Gemeinde dienen",
+          "Karriere machen",
+          "Aufmerksamkeit gewinnen"
+        ],
+        "richtig": 1
+      }
+    ]
+  }
+]

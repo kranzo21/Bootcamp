@@ -1,0 +1,50 @@
+[
+  {
+    "id": "drm-theorie-1",
+    "titel": "Grundrhythmen und Groove",
+    "videos": [
+      {
+        "titel": "Basic Drumming Patterns",
+        "url": "https://www.youtube.com/embed/PLACEHOLDER7"
+      }
+    ],
+    "texte": [
+      {
+        "titel": "Der 4/4 Grundrhythmus",
+        "inhalt": "Hier kommt der Text über Grundrhythmen für Schlagzeuger. Dieser Platzhalter wird durch den echten Inhalt ersetzt."
+      }
+    ],
+    "fragen": [
+      {
+        "frage": "Was ist der Beat im 4/4-Takt?",
+        "optionen": [
+          "Schlag auf 2 und 3",
+          "Schlag auf 1 und 3",
+          "Schlag auf 1, 2, 3 und 4",
+          "Kein fester Schlag"
+        ],
+        "richtig": 1
+      },
+      {
+        "frage": "Was macht ein guter Groove aus?",
+        "optionen": [
+          "Lautstärke",
+          "Geschwindigkeit",
+          "Konstanz und Timing",
+          "Komplexität"
+        ],
+        "richtig": 2
+      },
+      {
+        "frage": "Was ist eine Hi-Hat?",
+        "optionen": [
+          "Ein Hut",
+          "Ein Beckenpaar beim Schlagzeug",
+          "Ein Trommelstock",
+          "Ein Metronom"
+        ],
+        "richtig": 1
+      }
+    ]
+  }
+]
