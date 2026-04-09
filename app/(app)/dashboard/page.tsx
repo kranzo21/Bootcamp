@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import { getModules } from "@/lib/content/loader";
 import TrackCard from "@/components/dashboard/TrackCard";
 import type { Path, Progress } from "@/types";
@@ -9,18 +8,17 @@ export default async function DashboardPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
 
   const { data: profile } = await supabase
     .from("users")
     .select("name, path")
-    .eq("id", user.id)
+    .eq("id", user!.id)
     .single();
 
   const { data: progressRows } = await supabase
     .from("progress")
     .select("module_id, track, materials_completed, passed, completed_at")
-    .eq("user_id", user.id);
+    .eq("user_id", user!.id);
 
   const path = (profile?.path ?? "instrumentalist") as Path;
   const progress = (progressRows ?? []) as Progress[];
