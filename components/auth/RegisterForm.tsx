@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { resolvePath } from "@/lib/path/resolver";
@@ -45,34 +46,40 @@ export default function RegisterForm() {
     setLoading(true);
     setError(null);
 
-    const supabase = createClient();
-    const path = resolvePath(selectedInstruments);
+    try {
+      const supabase = createClient();
+      const path = resolvePath(selectedInstruments);
 
-    const { error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { name } },
-    });
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { name } },
+      });
 
-    if (signUpError) {
-      setError(signUpError.message);
+      if (signUpError) {
+        setError(signUpError.message);
+        return;
+      }
+
+      if (data.user) {
+        const { error: updateError } = await supabase
+          .from("users")
+          .update({ instruments: selectedInstruments, path })
+          .eq("id", data.user.id);
+
+        if (updateError) {
+          setError(
+            "Profil konnte nicht gespeichert werden. Bitte versuche es erneut.",
+          );
+          return;
+        }
+      }
+
+      router.push("/dashboard");
+      router.refresh();
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // Update profile with instruments and resolved path
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user) {
-      await supabase
-        .from("users")
-        .update({ instruments: selectedInstruments, path })
-        .eq("id", user.id);
-    }
-
-    router.push("/dashboard");
-    router.refresh();
   }
 
   return (
@@ -82,7 +89,11 @@ export default function RegisterForm() {
     >
       <h1 className="text-2xl font-bold text-center">Registrieren</h1>
 
-      {error && <p className="text-red-600 text-sm">{error}</p>}
+      {error && (
+        <p role="alert" className="text-red-600 text-sm">
+          {error}
+        </p>
+      )}
 
       <input
         type="text"
@@ -137,9 +148,9 @@ export default function RegisterForm() {
 
       <p className="text-center text-sm">
         Bereits registriert?{" "}
-        <a href="/login" className="text-blue-600 hover:underline">
+        <Link href="/login" className="text-blue-600 hover:underline">
           Anmelden
-        </a>
+        </Link>
       </p>
     </form>
   );

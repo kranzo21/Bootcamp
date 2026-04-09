@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -16,20 +17,23 @@ export default function LoginForm() {
     setLoading(true);
     setError(null);
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      setError("Email oder Passwort falsch.");
+      if (error) {
+        setError("Email oder Passwort falsch.");
+        return;
+      }
+
+      router.push("/dashboard");
+      router.refresh();
+    } finally {
       setLoading(false);
-      return;
     }
-
-    router.push("/dashboard");
-    router.refresh();
   }
 
   return (
@@ -39,7 +43,11 @@ export default function LoginForm() {
     >
       <h1 className="text-2xl font-bold text-center">Anmelden</h1>
 
-      {error && <p className="text-red-600 text-sm">{error}</p>}
+      {error && (
+        <p role="alert" className="text-red-600 text-sm">
+          {error}
+        </p>
+      )}
 
       <input
         type="email"
@@ -67,9 +75,9 @@ export default function LoginForm() {
 
       <p className="text-center text-sm">
         Noch kein Account?{" "}
-        <a href="/registrieren" className="text-blue-600 hover:underline">
+        <Link href="/registrieren" className="text-blue-600 hover:underline">
           Registrieren
-        </a>
+        </Link>
       </p>
     </form>
   );
