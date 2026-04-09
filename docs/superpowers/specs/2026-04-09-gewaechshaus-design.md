@@ -63,6 +63,18 @@ Nutzer wählen bei der Registrierung ihre Instrumente aus:
 | passed              | boolean   | Test bestanden                |
 | completed_at        | timestamp | Zeitpunkt des Abschlusses     |
 
+### `material_views`
+
+| Feld        | Typ       | Beschreibung                                        |
+| ----------- | --------- | --------------------------------------------------- |
+| id          | uuid      |                                                     |
+| user_id     | uuid      | Referenz auf users                                  |
+| module_id   | text      | ID des Moduls                                       |
+| material_id | text      | ID des Videos oder Texts (z.B. "video-0", "text-1") |
+| viewed_at   | timestamp | Zeitpunkt des ersten Öffnens                        |
+
+Sobald alle Material-IDs eines Moduls in dieser Tabelle vorhanden sind, wird `materials_completed` in `progress` auf `true` gesetzt und der "Test starten"-Button eingeblendet.
+
 ### `quiz_attempts`
 
 | Feld         | Typ       | Beschreibung                 |
