@@ -6,7 +6,6 @@ import type { Module, Track } from "@/types";
 interface Props {
   module: Module;
   track: Track;
-  userId: string;
   onComplete: () => void;
 }
 
@@ -19,6 +18,7 @@ export default function Quiz({ module, track, onComplete }: Props) {
     passed: boolean;
   } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   function selectAnswer(questionIndex: number, optionIndex: number) {
     setAnswers((prev) => {
@@ -31,22 +31,33 @@ export default function Quiz({ module, track, onComplete }: Props) {
   async function handleSubmit() {
     if (answers.some((a) => a === null)) return;
     setLoading(true);
+    setFetchError(null);
 
-    const correctAnswers = module.fragen.map((f) => f.richtig);
-    const res = await fetch("/api/quiz", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        moduleId: module.id,
-        track,
-        correctAnswers,
-        givenAnswers: answers,
-      }),
-    });
+    try {
+      const correctAnswers = module.fragen.map((f) => f.richtig);
+      const res = await fetch("/api/quiz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          moduleId: module.id,
+          track,
+          correctAnswers,
+          givenAnswers: answers,
+        }),
+      });
 
-    const data = await res.json();
-    setResult(data);
-    setLoading(false);
+      if (!res.ok) {
+        setFetchError("Fehler beim Auswerten. Bitte versuche es erneut.");
+        return;
+      }
+
+      const data = await res.json();
+      setResult(data);
+    } catch {
+      setFetchError("Netzwerkfehler. Bitte versuche es erneut.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (result) {
@@ -117,6 +128,8 @@ export default function Quiz({ module, track, onComplete }: Props) {
           ))}
         </div>
       ))}
+
+      {fetchError && <p className="text-red-600 text-sm">{fetchError}</p>}
 
       <button
         onClick={handleSubmit}

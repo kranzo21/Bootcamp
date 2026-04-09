@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import VideoPlayer from "@/components/module/VideoPlayer";
@@ -35,10 +35,13 @@ export default function ModuleClient({
   );
   const [showQuiz, setShowQuiz] = useState(false);
 
-  const allMaterialIds = [
-    ...module.videos.map((_, i) => `video-${i}`),
-    ...module.texte.map((_, i) => `text-${i}`),
-  ];
+  const allMaterialIds = useMemo(
+    () => [
+      ...module.videos.map((_, i) => `video-${i}`),
+      ...module.texte.map((_, i) => `text-${i}`),
+    ],
+    [module.videos, module.texte],
+  );
 
   const handleViewed = useCallback(
     async (materialId: string) => {
@@ -64,7 +67,6 @@ export default function ModuleClient({
           module_id: module.id,
           track,
           materials_completed: true,
-          passed: false,
         });
       }
     },
@@ -151,7 +153,6 @@ export default function ModuleClient({
         <Quiz
           module={module}
           track={track}
-          userId={userId}
           onComplete={() => router.push("/dashboard")}
         />
       )}

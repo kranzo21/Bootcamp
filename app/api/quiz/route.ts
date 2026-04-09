@@ -13,6 +13,20 @@ export async function POST(request: NextRequest) {
   const { moduleId, track, correctAnswers, givenAnswers } =
     await request.json();
 
+  if (
+    !moduleId ||
+    !track ||
+    !Array.isArray(correctAnswers) ||
+    !Array.isArray(givenAnswers) ||
+    correctAnswers.length === 0 ||
+    correctAnswers.length !== givenAnswers.length
+  ) {
+    return NextResponse.json(
+      { error: "Invalid request body" },
+      { status: 400 },
+    );
+  }
+
   const score = calculateScore(correctAnswers, givenAnswers);
   const passed = isPassing(score);
 
