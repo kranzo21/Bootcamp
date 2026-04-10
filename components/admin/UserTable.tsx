@@ -46,7 +46,7 @@ export default function UserTable({ users }: Props) {
           <tr key={u.id} className="border-b hover:bg-gray-50">
             <td className="py-2 pr-4 font-medium">{u.name}</td>
             <td className="py-2 pr-4">{u.email}</td>
-            <td className="py-2 pr-4">{u.instruments.join(", ")}</td>
+            <td className="py-2 pr-4">{(u.instruments ?? []).join(", ")}</td>
             <td className="py-2 pr-4">{PATH_LABELS[u.path] ?? u.path}</td>
             <td className="py-2 pr-4">
               {new Date(u.created_at).toLocaleDateString("de-DE")}

@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 export default async function AdminLayout({
   children,
@@ -24,9 +25,12 @@ export default async function AdminLayout({
     <div className="max-w-5xl mx-auto p-6">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold">Admin – Gewächshaus</h1>
-        <a href="/dashboard" className="text-sm text-blue-600 hover:underline">
+        <Link
+          href="/dashboard"
+          className="text-sm text-blue-600 hover:underline"
+        >
           Mein Dashboard
-        </a>
+        </Link>
       </div>
       {children}
     </div>

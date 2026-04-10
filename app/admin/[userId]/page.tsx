@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { getModules } from "@/lib/content/loader";
 import UserDetail from "@/components/admin/UserDetail";
 import type { Path, Progress } from "@/types";
@@ -22,6 +23,7 @@ const PATH_LABELS: Record<string, string> = {
 
 export default async function AdminUserPage({ params }: Props) {
   const { userId } = await params;
+  const VALID_PATHS = ["instrumentalist", "vocals", "drums"] as const;
   const supabase = await createClient();
 
   const { data: user } = await supabase
@@ -34,7 +36,7 @@ export default async function AdminUserPage({ params }: Props) {
 
   const { data: progressRows } = await supabase
     .from("progress")
-    .select("module_id, track, materials_completed, passed, completed_at")
+    .select("module_id, track, passed, completed_at")
     .eq("user_id", userId);
 
   const [{ data: materialViews }, { data: quizAttempts }] = await Promise.all([
@@ -61,17 +63,19 @@ export default async function AdminUserPage({ params }: Props) {
   const lastActivity =
     candidates.length > 0 ? candidates.reduce((a, b) => (a > b ? a : b)) : null;
 
-  const path = user.path as Path;
+  const path = (
+    VALID_PATHS.includes(user.path as Path) ? user.path : "instrumentalist"
+  ) as Path;
   const progress = (progressRows ?? []) as Progress[];
 
   return (
     <>
-      <a
+      <Link
         href="/admin"
         className="text-blue-600 text-sm hover:underline mb-4 block"
       >
         ← Alle Nutzer
-      </a>
+      </Link>
 
       <div className="mb-6">
         <h2 className="text-xl font-bold">{user.name}</h2>

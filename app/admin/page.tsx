@@ -17,11 +17,17 @@ export default async function AdminPage() {
     .select("user_id, module_id, track, passed");
 
   const usersWithProgress = (users ?? []).map((user) => {
-    const path = user.path as Path;
+    const validPaths = ["instrumentalist", "vocals", "drums"] as const;
+    const path = (
+      validPaths.includes(user.path as Path) ? user.path : "instrumentalist"
+    ) as Path;
     const totalModules =
       getModules(path, "theologie").length + getModules(path, "theorie").length;
     const passedModules = (allProgress ?? []).filter(
-      (p) => p.user_id === user.id && p.passed,
+      (p) =>
+        p.user_id === user.id &&
+        p.passed &&
+        (p.track === "theologie" || p.track === "theorie"),
     ).length;
     const progressPercent =
       totalModules > 0 ? (passedModules / totalModules) * 100 : 0;
