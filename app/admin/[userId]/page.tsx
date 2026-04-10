@@ -37,6 +37,30 @@ export default async function AdminUserPage({ params }: Props) {
     .select("module_id, track, materials_completed, passed, completed_at")
     .eq("user_id", userId);
 
+  const [{ data: materialViews }, { data: quizAttempts }] = await Promise.all([
+    supabase
+      .from("material_views")
+      .select("viewed_at")
+      .eq("user_id", userId)
+      .order("viewed_at", { ascending: false })
+      .limit(1),
+    supabase
+      .from("quiz_attempts")
+      .select("attempted_at")
+      .eq("user_id", userId)
+      .order("attempted_at", { ascending: false })
+      .limit(1),
+  ]);
+
+  const candidates = [
+    ...(progressRows ?? []).map((r) => r.completed_at).filter(Boolean),
+    materialViews?.[0]?.viewed_at ?? null,
+    quizAttempts?.[0]?.attempted_at ?? null,
+  ].filter((v): v is string => v !== null);
+
+  const lastActivity =
+    candidates.length > 0 ? candidates.reduce((a, b) => (a > b ? a : b)) : null;
+
   const path = user.path as Path;
   const progress = (progressRows ?? []) as Progress[];
 
@@ -60,6 +84,12 @@ export default async function AdminUserPage({ params }: Props) {
         <p className="text-sm text-gray-500 mt-1">
           Instrumente: {user.instruments.join(", ")}
         </p>
+        {lastActivity && (
+          <p className="text-sm text-gray-500 mt-1">
+            Letzte Aktivität:{" "}
+            {new Date(lastActivity).toLocaleDateString("de-DE")}
+          </p>
+        )}
       </div>
 
       <div className="flex flex-col gap-4">
