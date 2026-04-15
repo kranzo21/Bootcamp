@@ -1,46 +1,56 @@
-import { createClient } from "@/lib/supabase/server";
-import { getModules } from "@/lib/content/loader";
-import UserTable from "@/components/admin/UserTable";
-import type { Path } from "@/types";
+// app/admin/page.tsx
+import { createAdminClient } from "@/lib/supabase/admin";
+import Link from "next/link";
 
 export default async function AdminPage() {
-  const supabase = await createClient();
-
-  const { data: users } = await supabase
+  const db = createAdminClient();
+  const { count: userCount } = await db
     .from("users")
-    .select("id, name, email, path, instruments, created_at")
-    .eq("is_admin", false)
-    .order("created_at", { ascending: false });
-
-  const { data: allProgress } = await supabase
-    .from("progress")
-    .select("user_id, module_id, track, passed");
-
-  const usersWithProgress = (users ?? []).map((user) => {
-    const validPaths = ["instrumentalist", "vocals", "drums"] as const;
-    const path = (
-      validPaths.includes(user.path as Path) ? user.path : "instrumentalist"
-    ) as Path;
-    const totalModules =
-      getModules(path, "theologie").length + getModules(path, "theorie").length;
-    const passedModules = (allProgress ?? []).filter(
-      (p) =>
-        p.user_id === user.id &&
-        p.passed &&
-        (p.track === "theologie" || p.track === "theorie"),
-    ).length;
-    const progressPercent =
-      totalModules > 0 ? (passedModules / totalModules) * 100 : 0;
-
-    return { ...user, progressPercent };
-  });
+    .select("*", { count: "exact", head: true });
+  const { count: lektionenCount } = await db
+    .from("lektionen")
+    .select("*", { count: "exact", head: true });
+  const { count: badgeCount } = await db
+    .from("user_badges")
+    .select("*", { count: "exact", head: true });
 
   return (
-    <>
-      <p className="text-gray-600 mb-4">
-        {usersWithProgress.length} Nutzer registriert
-      </p>
-      <UserTable users={usersWithProgress} />
-    </>
+    <main className="max-w-3xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
+      <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="border rounded-lg p-4 text-center">
+          <p className="text-3xl font-bold">{userCount ?? 0}</p>
+          <p className="text-gray-500 text-sm">Nutzer</p>
+        </div>
+        <div className="border rounded-lg p-4 text-center">
+          <p className="text-3xl font-bold">{lektionenCount ?? 0}</p>
+          <p className="text-gray-500 text-sm">Lektionen</p>
+        </div>
+        <div className="border rounded-lg p-4 text-center">
+          <p className="text-3xl font-bold">{badgeCount ?? 0}</p>
+          <p className="text-gray-500 text-sm">Abzeichen vergeben</p>
+        </div>
+      </div>
+      <div className="flex flex-col gap-3">
+        <Link
+          href="/admin/nutzer"
+          className="border rounded-lg p-4 hover:shadow transition font-medium"
+        >
+          👥 Nutzerverwaltung
+        </Link>
+        <Link
+          href="/admin/inhalte"
+          className="border rounded-lg p-4 hover:shadow transition font-medium"
+        >
+          📚 Inhaltsverwaltung
+        </Link>
+        <Link
+          href="/admin/qualifikationen"
+          className="border rounded-lg p-4 hover:shadow transition font-medium"
+        >
+          🎓 Qualifikationen
+        </Link>
+      </div>
+    </main>
   );
 }
