@@ -62,6 +62,11 @@ export default function RegisterForm() {
       }
 
       if (data.user) {
+        // Ensure session is established before the DB update
+        if (data.session) {
+          await supabase.auth.setSession(data.session);
+        }
+
         const { error: updateError } = await supabase
           .from("users")
           .update({ instruments: selectedInstruments, path })
@@ -69,7 +74,7 @@ export default function RegisterForm() {
 
         if (updateError) {
           setError(
-            "Profil konnte nicht gespeichert werden. Bitte versuche es erneut.",
+            `Profil konnte nicht gespeichert werden: ${updateError.message}`,
           );
           return;
         }
