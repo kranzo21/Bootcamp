@@ -26,6 +26,7 @@ export interface Tutorial {
   video_url: string;
   description: string;
   order: number;
+  instrument: string | null;
 }
 
 export interface Lektion {
@@ -34,6 +35,9 @@ export interface Lektion {
   title: string;
   description: string;
   order: number;
+  content: string | null;
+  video_url: string | null;
+  video_position: "above" | "below";
 }
 
 export interface Material {
@@ -62,8 +66,9 @@ export interface Ressource {
   title: string;
   description: string;
   url: string;
-  type: "link" | "pdf" | "dokument";
+  type: "pdf" | "audio" | "image" | "youtube";
   order: number;
+  instrument: string | null;
 }
 
 export interface Badge {
