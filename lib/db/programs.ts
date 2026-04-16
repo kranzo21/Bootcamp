@@ -103,3 +103,29 @@ export async function getProgramById(id: string): Promise<Program | null> {
     .single();
   return data;
 }
+
+export async function getRegularAreasByProgram(
+  programId: string,
+): Promise<Area[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("areas")
+    .select("*")
+    .eq("program_id", programId)
+    .eq("area_type", "regular")
+    .order("order");
+  return data ?? [];
+}
+
+export async function getInstrumentAreasByProgram(
+  programId: string,
+): Promise<Area[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("areas")
+    .select("*")
+    .eq("program_id", programId)
+    .eq("area_type", "instrument")
+    .order("order");
+  return data ?? [];
+}

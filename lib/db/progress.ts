@@ -59,3 +59,12 @@ export async function getLastQuizAttempt(userId: string, lektionId: string) {
     .single();
   return data;
 }
+
+export async function getUserFavourites(userId: string) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("user_favourites")
+    .select("*")
+    .eq("user_id", userId);
+  return data ?? [];
+}
