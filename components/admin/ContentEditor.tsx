@@ -18,8 +18,23 @@ function ContentEditorInner() {
     program: ["name", "slug", "description", "order"],
     area: ["name", "slug", "description", "order", "program_id"],
     lektion: ["title", "description", "order", "area_id"],
-    tutorial: ["title", "video_url", "description", "order", "area_id"],
-    ressource: ["title", "description", "url", "type", "order", "area_id"],
+    tutorial: [
+      "title",
+      "video_url",
+      "description",
+      "instrument",
+      "order",
+      "area_id",
+    ],
+    ressource: [
+      "title",
+      "type",
+      "description",
+      "url",
+      "instrument",
+      "order",
+      "area_id",
+    ],
     material: [
       "title",
       "type",
@@ -116,8 +131,28 @@ function ContentEditorInner() {
       <div className="flex flex-col gap-4">
         {(fieldDefs[type] ?? []).map((f) => (
           <div key={f}>
-            <label className="block text-sm font-medium mb-1">{f}</label>
-            {f === "content" || f === "description" ? (
+            <label className="block text-sm font-medium mb-1">
+              {f === "video_url"
+                ? "YouTube-URL"
+                : f === "instrument"
+                  ? "Instrument (optional)"
+                  : f === "area_id"
+                    ? "Bereich-ID"
+                    : f}
+            </label>
+            {f === "type" && type === "ressource" ? (
+              <select
+                value={fields[f] ?? ""}
+                onChange={(e) => setFields({ ...fields, [f]: e.target.value })}
+                className="border rounded px-3 py-2 w-full"
+              >
+                <option value="">— Typ wählen —</option>
+                <option value="pdf">PDF</option>
+                <option value="audio">Audio</option>
+                <option value="image">Bild</option>
+                <option value="youtube">YouTube</option>
+              </select>
+            ) : f === "content" || f === "description" ? (
               <textarea
                 value={fields[f] ?? ""}
                 onChange={(e) => setFields({ ...fields, [f]: e.target.value })}
@@ -129,6 +164,11 @@ function ContentEditorInner() {
                 value={fields[f] ?? ""}
                 onChange={(e) => setFields({ ...fields, [f]: e.target.value })}
                 className="border rounded px-3 py-2 w-full"
+                placeholder={
+                  f === "video_url"
+                    ? "https://www.youtube.com/watch?v=..."
+                    : undefined
+                }
               />
             )}
           </div>
