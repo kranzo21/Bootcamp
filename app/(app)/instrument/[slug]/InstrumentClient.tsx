@@ -115,9 +115,11 @@ export default function InstrumentClient({
                 <span className="text-xl">
                   {r.type === "pdf"
                     ? "📄"
-                    : r.type === "dokument"
-                      ? "📝"
-                      : "🔗"}
+                    : r.type === "audio"
+                      ? "🎵"
+                      : r.type === "image"
+                        ? "🖼️"
+                        : "🔗"}
                 </span>
                 <div>
                   <h3 className="font-semibold hover:text-blue-600">
