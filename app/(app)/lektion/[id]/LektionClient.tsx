@@ -3,30 +3,24 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import type { Lektion, Material, QuizQuestion, Badge } from "@/types";
+import type { Lektion, QuizQuestion, Badge } from "@/types";
+import { toYouTubeEmbedUrl } from "@/lib/youtube";
 
 interface Props {
   lektion: Lektion;
-  materials: Material[];
   questions: QuizQuestion[];
   badge: Badge | null;
-  viewedMaterialIds: string[];
-  materialsCompleted: boolean;
   passed: boolean;
   lockedUntil: string | null;
 }
 
 export default function LektionClient({
   lektion,
-  materials,
   questions,
   badge,
-  viewedMaterialIds,
-  materialsCompleted,
   passed,
   lockedUntil,
 }: Props) {
-  const [viewed, setViewed] = useState<Set<string>>(new Set(viewedMaterialIds));
   const [quizAnswers, setQuizAnswers] = useState<(number | null)[]>(
     questions.map(() => null),
   );
@@ -37,20 +31,10 @@ export default function LektionClient({
   const [showQuiz, setShowQuiz] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const allViewed =
-    materials.length > 0 && materials.every((m) => viewed.has(m.id));
-
-  async function markViewed(materialId: string) {
-    if (viewed.has(materialId)) return;
-    const newViewed = new Set(viewed);
-    newViewed.add(materialId);
-    setViewed(newViewed);
-    await fetch("/api/material-view", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ materialId, lektionId: lektion.id }),
-    });
-  }
+  const embedUrl = lektion.video_url
+    ? toYouTubeEmbedUrl(lektion.video_url)
+    : null;
+  const isLocked = lockedUntil && new Date(lockedUntil) > new Date();
 
   async function submitQuiz() {
     if (quizAnswers.some((a) => a === null)) {
@@ -72,9 +56,14 @@ export default function LektionClient({
     setLoading(false);
   }
 
-  const isLocked = lockedUntil && new Date(lockedUntil) > new Date();
-  const canStartQuiz =
-    (materialsCompleted || allViewed) && !passed && !isLocked;
+  const videoBlock = embedUrl ? (
+    <iframe
+      src={embedUrl}
+      className="w-full aspect-video rounded-lg mb-8"
+      allowFullScreen
+      title={lektion.title}
+    />
+  ) : null;
 
   return (
     <main className="max-w-2xl mx-auto p-6">
@@ -85,7 +74,9 @@ export default function LektionClient({
         ← Zurück
       </Link>
       <h1 className="text-3xl font-bold mb-2">{lektion.title}</h1>
-      <p className="text-gray-600 mb-8">{lektion.description}</p>
+      {lektion.description && (
+        <p className="text-gray-600 mb-6">{lektion.description}</p>
+      )}
 
       {passed && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
@@ -98,51 +89,23 @@ export default function LektionClient({
         </div>
       )}
 
-      {/* Materialien */}
-      <section className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Materialien</h2>
-        <div className="flex flex-col gap-4">
-          {materials.map((m) => (
-            <div
-              key={m.id}
-              className={`border rounded-lg p-4 ${viewed.has(m.id) ? "border-green-300 bg-green-50" : ""}`}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-medium">{m.title}</h3>
-                {viewed.has(m.id) && (
-                  <span className="text-green-600 text-sm">✓ Gesehen</span>
-                )}
-              </div>
-              {m.type === "video" && (
-                <div
-                  onClick={() => markViewed(m.id)}
-                  className="cursor-pointer"
-                >
-                  <iframe
-                    src={m.video_url ?? ""}
-                    className="w-full aspect-video rounded"
-                    allowFullScreen
-                    onLoad={() => markViewed(m.id)}
-                  />
-                </div>
-              )}
-              {m.type === "text" && (
-                <div
-                  className="prose text-sm text-gray-700"
-                  onClick={() => markViewed(m.id)}
-                  onMouseEnter={() => markViewed(m.id)}
-                >
-                  {m.content}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Video oben */}
+      {lektion.video_position !== "below" && videoBlock}
+
+      {/* Text-Content */}
+      {lektion.content && (
+        <div
+          className="prose prose-sm max-w-none mb-8"
+          dangerouslySetInnerHTML={{ __html: lektion.content }}
+        />
+      )}
+
+      {/* Video unten */}
+      {lektion.video_position === "below" && videoBlock}
 
       {/* Quiz */}
       {questions.length > 0 && !passed && (
-        <section>
+        <section className="mt-8">
           {isLocked && (
             <p className="text-orange-600 text-sm mb-4">
               Nächster Versuch möglich ab{" "}
@@ -152,7 +115,7 @@ export default function LektionClient({
           {!showQuiz ? (
             <button
               onClick={() => setShowQuiz(true)}
-              disabled={!canStartQuiz}
+              disabled={Boolean(isLocked)}
               className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Test starten
@@ -190,7 +153,11 @@ export default function LektionClient({
               ))}
               {quizResult ? (
                 <div
-                  className={`rounded-lg p-4 ${quizResult.passed ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"} border`}
+                  className={`rounded-lg p-4 border ${
+                    quizResult.passed
+                      ? "bg-green-50 border-green-200"
+                      : "bg-red-50 border-red-200"
+                  }`}
                 >
                   <p className="font-semibold">
                     {quizResult.passed ? "✓ Bestanden!" : "✗ Nicht bestanden."}
