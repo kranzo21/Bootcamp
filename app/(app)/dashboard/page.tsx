@@ -17,7 +17,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from("users")
-    .select("name")
+    .select("name, is_admin")
     .eq("id", user!.id)
     .single();
 
@@ -68,14 +68,24 @@ export default async function DashboardPage() {
     <main className="max-w-3xl mx-auto p-6">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">Hallo, {profile?.name}!</h1>
-        <form action="/api/logout" method="POST">
-          <button
-            type="submit"
-            className="text-sm text-gray-500 hover:underline"
-          >
-            Abmelden
-          </button>
-        </form>
+        <div className="flex items-center gap-4">
+          {profile?.is_admin && (
+            <Link
+              href="/admin"
+              className="text-sm text-blue-600 hover:underline"
+            >
+              Admin-Bereich
+            </Link>
+          )}
+          <form action="/api/logout" method="POST">
+            <button
+              type="submit"
+              className="text-sm text-gray-500 hover:underline"
+            >
+              Abmelden
+            </button>
+          </form>
+        </div>
       </div>
 
       {/* Programme */}
