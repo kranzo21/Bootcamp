@@ -16,6 +16,7 @@ export interface Area {
   slug: string;
   description: string;
   order: number;
+  area_type: "regular" | "instrument";
 }
 
 export interface Tutorial {
@@ -90,6 +91,15 @@ export interface UserProfile {
   name: string;
   email: string;
   is_admin: boolean;
+  instruments: string[];
+  created_at: string;
+}
+
+export interface UserFavourite {
+  id: string;
+  user_id: string;
+  item_type: "tutorial" | "ressource";
+  item_id: string;
   created_at: string;
 }
 
