@@ -69,3 +69,37 @@ export async function getRessourcenByArea(
     .order("order");
   return data ?? [];
 }
+
+export async function getTutorialsByProgram(
+  programId: string,
+): Promise<Tutorial[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("tutorials")
+    .select("*, areas!inner(program_id)")
+    .eq("areas.program_id", programId)
+    .order("order");
+  return (data ?? []).map(({ areas: _, ...t }) => t as Tutorial);
+}
+
+export async function getRessourcenByProgram(
+  programId: string,
+): Promise<Ressource[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("ressourcen")
+    .select("*, areas!inner(program_id)")
+    .eq("areas.program_id", programId)
+    .order("order");
+  return (data ?? []).map(({ areas: _, ...r }) => r as Ressource);
+}
+
+export async function getProgramById(id: string): Promise<Program | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("programs")
+    .select("*")
+    .eq("id", id)
+    .single();
+  return data;
+}
