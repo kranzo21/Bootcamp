@@ -6,6 +6,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
+const INSTRUMENT_OPTIONS = [
+  { value: "drums", label: "Drums" },
+  { value: "keys", label: "Keys" },
+  { value: "a-gitarre", label: "Akustikgitarre" },
+  { value: "e-gitarre", label: "E-Gitarre" },
+  { value: "bass", label: "Bass" },
+  { value: "geige", label: "Geige" },
+  { value: "vocals", label: "Vocals" },
+];
+
 export default function RegisterForm({
   programs,
 }: {
@@ -16,8 +26,15 @@ export default function RegisterForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [selectedProgram, setSelectedProgram] = useState<string>("");
+  const [selectedInstruments, setSelectedInstruments] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  function toggleInstrument(value: string) {
+    setSelectedInstruments((prev) =>
+      prev.includes(value) ? prev.filter((i) => i !== value) : [...prev, value],
+    );
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,12 +57,20 @@ export default function RegisterForm({
       }
       if (data.user) {
         if (data.session) await supabase.auth.setSession(data.session);
+
         const { error: enrollError } = await supabase
           .from("user_programs")
           .insert({ user_id: data.user.id, program_id: selectedProgram });
         if (enrollError) {
           setError(`Einschreibung fehlgeschlagen: ${enrollError.message}`);
           return;
+        }
+
+        if (selectedInstruments.length > 0) {
+          await supabase
+            .from("users")
+            .update({ instruments: selectedInstruments })
+            .eq("id", data.user.id);
         }
       }
       router.push("/dashboard");
@@ -108,6 +133,31 @@ export default function RegisterForm({
                 className="w-4 h-4"
               />
               {p.name}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <fieldset className="border rounded p-3">
+        <legend className="text-sm font-medium px-1">
+          Instrumente (optional)
+        </legend>
+        <div className="flex flex-wrap gap-2 mt-2">
+          {INSTRUMENT_OPTIONS.map((inst) => (
+            <label
+              key={inst.value}
+              className={`flex items-center gap-1 cursor-pointer px-3 py-1 rounded-full border text-sm transition ${
+                selectedInstruments.includes(inst.value)
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "border-gray-300 text-gray-700"
+              }`}
+            >
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={selectedInstruments.includes(inst.value)}
+                onChange={() => toggleInstrument(inst.value)}
+              />
+              {inst.label}
             </label>
           ))}
         </div>
