@@ -1,7 +1,7 @@
 // components/admin/LektionEditor.tsx
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import QuizEditor from "./QuizEditor";
@@ -13,16 +13,18 @@ interface Props {
 
 export default function LektionEditor({ lektionId }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const isEdit = Boolean(lektionId);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [areaId, setAreaId] = useState("");
+  const [areaId, setAreaId] = useState(searchParams.get("areaId") ?? "");
   const [videoUrl, setVideoUrl] = useState("");
   const [videoPosition, setVideoPosition] = useState<"above" | "below">(
     "above",
   );
   const [order, setOrder] = useState("0");
+  const [status, setStatus] = useState<"draft" | "published">("draft");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
@@ -51,6 +53,7 @@ export default function LektionEditor({ lektionId }: Props) {
         setVideoUrl(data.video_url ?? "");
         setVideoPosition(data.video_position ?? "above");
         setOrder(String(data.order ?? 0));
+        setStatus(data.status ?? "published");
         if (data.content) editor.commands.setContent(data.content);
       });
 
@@ -60,7 +63,7 @@ export default function LektionEditor({ lektionId }: Props) {
       .catch(() => {});
   }, [isEdit, lektionId, editor]);
 
-  async function save() {
+  async function save(saveStatus: "draft" | "published") {
     setSaving(true);
     setError(null);
     const content = editor?.getHTML() ?? "";
@@ -72,6 +75,7 @@ export default function LektionEditor({ lektionId }: Props) {
       video_position: videoPosition,
       order: parseInt(order),
       content,
+      status: saveStatus,
     };
 
     const res = await fetch("/api/admin/content", {
@@ -86,7 +90,7 @@ export default function LektionEditor({ lektionId }: Props) {
       setSaving(false);
       return;
     }
-    router.push("/admin/inhalte");
+    router.back();
   }
 
   return (
@@ -231,13 +235,28 @@ export default function LektionEditor({ lektionId }: Props) {
         </div>
       </div>
 
-      <button
-        onClick={save}
-        disabled={saving}
-        className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-      >
-        {saving ? "Speichern..." : "Speichern"}
-      </button>
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => save("draft")}
+          disabled={saving}
+          className="border border-border text-ink px-5 py-2 rounded-lg hover:bg-gray-50 disabled:opacity-50 text-sm"
+        >
+          {saving ? "Speichern..." : "Als Entwurf speichern"}
+        </button>
+        <button
+          onClick={() => save("published")}
+          disabled={saving}
+          className="bg-teal text-white px-5 py-2 rounded-lg hover:opacity-90 disabled:opacity-50 text-sm"
+        >
+          {saving ? "Speichern..." : "Veröffentlichen"}
+        </button>
+      </div>
+      {status === "draft" && (
+        <p className="text-xs text-yellow-600 mt-2">Aktuell: Entwurf</p>
+      )}
+      {status === "published" && (
+        <p className="text-xs text-green-600 mt-2">Aktuell: Live</p>
+      )}
 
       {isEdit && lektionId && (
         <QuizEditor lektionId={lektionId} initialQuestions={quizQuestions} />
