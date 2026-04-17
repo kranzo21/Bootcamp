@@ -49,9 +49,6 @@ function RessourceItem({
 
       {open && (
         <div className="px-4 pb-4 border-t border-border pt-3">
-          {r.description && (
-            <p className="text-sm text-gray-mid mb-3">{r.description}</p>
-          )}
           {r.type === "youtube" && embedUrl && (
             <iframe
               src={embedUrl}
@@ -82,6 +79,9 @@ function RessourceItem({
               alt={r.title}
               className="w-full rounded-lg max-h-64 object-contain"
             />
+          )}
+          {r.description && (
+            <p className="text-sm text-gray-mid mt-3">{r.description}</p>
           )}
         </div>
       )}
