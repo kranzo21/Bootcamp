@@ -3,14 +3,38 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 
+const FIELD_LABELS: Record<string, string> = {
+  name: "Name",
+  slug: "URL-Kürzel (slug)",
+  description: "Beschreibung",
+  order: "Reihenfolge",
+  program_id: "Programm-ID",
+  area_id: "Bereich",
+  lektion_id: "Lektion-ID",
+  tutorial_id: "Tutorial-ID",
+  title: "Titel",
+  video_url: "YouTube-URL",
+  instrument: "Instrument (optional)",
+  url: "Link-URL",
+  type: "Typ",
+  content: "Inhalt",
+  question: "Frage",
+  options: "Antwortmöglichkeiten (JSON-Array)",
+  correct_index: "Richtige Antwort (0–3)",
+  icon: "Icon",
+};
+
 function ContentEditorInner() {
   const params = useSearchParams();
   const router = useRouter();
   const type = params.get("type") ?? "";
   const id = params.get("id");
+  const prefilledAreaId = params.get("areaId") ?? "";
   const isEdit = Boolean(id);
 
-  const [fields, setFields] = useState<Record<string, string>>({});
+  const [fields, setFields] = useState<Record<string, string>>({
+    area_id: prefilledAreaId,
+  });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,6 +79,14 @@ function ContentEditorInner() {
     qualification: ["name", "description"],
   };
 
+  // Fields hidden from UI (pre-filled or not user-facing)
+  const hiddenFields = new Set([
+    "area_id",
+    "lektion_id",
+    "tutorial_id",
+    "program_id",
+  ]);
+
   const tableMap: Record<string, string> = {
     program: "programs",
     area: "areas",
@@ -86,17 +118,25 @@ function ContentEditorInner() {
     setSaving(true);
     setError(null);
     const data: Record<string, any> = { ...fields };
+
+    // Pre-fill hidden area_id from URL if not already set
+    if (prefilledAreaId && !data.area_id) {
+      data.area_id = prefilledAreaId;
+    }
+
     if (type === "quiz_question") {
       try {
         data.options = JSON.parse(fields.options ?? "[]");
       } catch {
-        setError("options muss ein JSON-Array sein");
+        setError("Antworten müssen als JSON-Array angegeben werden");
         setSaving(false);
         return;
       }
       data.correct_index = parseInt(fields.correct_index);
     }
-    if (fields.order !== undefined) data.order = parseInt(fields.order);
+    if (fields.order !== undefined && fields.order !== "") {
+      data.order = parseInt(fields.order);
+    }
 
     const res = await fetch("/api/admin/content", {
       method: isEdit ? "PATCH" : "POST",
@@ -109,7 +149,7 @@ function ContentEditorInner() {
       setSaving(false);
       return;
     }
-    router.push("/admin/inhalte");
+    router.back();
   }
 
   async function deleteItem() {
@@ -119,32 +159,30 @@ function ContentEditorInner() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ table: tableMap[type], id }),
     });
-    router.push("/admin/inhalte");
+    router.back();
   }
+
+  const visibleFields = (fieldDefs[type] ?? []).filter(
+    (f) => !(hiddenFields.has(f) && (prefilledAreaId || isEdit)),
+  );
 
   return (
     <main className="max-w-lg mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">
+      <h1 className="text-2xl font-bold tracking-tight text-ink mb-6">
         {isEdit ? "Bearbeiten" : "Neu"}: {type}
       </h1>
       {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
       <div className="flex flex-col gap-4">
-        {(fieldDefs[type] ?? []).map((f) => (
+        {visibleFields.map((f) => (
           <div key={f}>
-            <label className="block text-sm font-medium mb-1">
-              {f === "video_url"
-                ? "YouTube-URL"
-                : f === "instrument"
-                  ? "Instrument (optional)"
-                  : f === "area_id"
-                    ? "Bereich-ID"
-                    : f}
+            <label className="block text-sm font-medium text-ink mb-1">
+              {FIELD_LABELS[f] ?? f}
             </label>
             {f === "type" && type === "ressource" ? (
               <select
                 value={fields[f] ?? ""}
                 onChange={(e) => setFields({ ...fields, [f]: e.target.value })}
-                className="border rounded px-3 py-2 w-full"
+                className="border border-border rounded-lg px-3 py-2 w-full text-sm"
               >
                 <option value="">— Typ wählen —</option>
                 <option value="pdf">PDF</option>
@@ -156,18 +194,27 @@ function ContentEditorInner() {
               <textarea
                 value={fields[f] ?? ""}
                 onChange={(e) => setFields({ ...fields, [f]: e.target.value })}
-                className="border rounded px-3 py-2 w-full"
+                className="border border-border rounded-lg px-3 py-2 w-full text-sm"
                 rows={4}
+              />
+            ) : f === "order" ? (
+              <input
+                type="number"
+                value={fields[f] ?? "0"}
+                onChange={(e) => setFields({ ...fields, [f]: e.target.value })}
+                className="border border-border rounded-lg px-3 py-2 w-32 text-sm"
               />
             ) : (
               <input
                 value={fields[f] ?? ""}
                 onChange={(e) => setFields({ ...fields, [f]: e.target.value })}
-                className="border rounded px-3 py-2 w-full"
+                className="border border-border rounded-lg px-3 py-2 w-full text-sm"
                 placeholder={
                   f === "video_url"
                     ? "https://www.youtube.com/watch?v=..."
-                    : undefined
+                    : f === "url"
+                      ? "https://..."
+                      : undefined
                 }
               />
             )}
@@ -177,14 +224,14 @@ function ContentEditorInner() {
           <button
             onClick={save}
             disabled={saving}
-            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+            className="bg-teal text-white px-5 py-2 rounded-lg hover:opacity-90 disabled:opacity-50 text-sm"
           >
             {saving ? "Speichern..." : "Speichern"}
           </button>
           {isEdit && (
             <button
               onClick={deleteItem}
-              className="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700"
+              className="border border-red-200 text-red-600 px-5 py-2 rounded-lg hover:bg-red-50 text-sm"
             >
               Löschen
             </button>

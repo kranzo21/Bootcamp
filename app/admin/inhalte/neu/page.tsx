@@ -9,7 +9,13 @@ async function NeuPage({
   searchParams: Promise<{ type?: string }>;
 }) {
   const { type } = await searchParams;
-  if (type === "lektion") return <LektionEditor />;
+  if (type === "lektion") {
+    return (
+      <Suspense>
+        <LektionEditor />
+      </Suspense>
+    );
+  }
   return <ContentEditor />;
 }
 
