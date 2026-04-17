@@ -59,32 +59,36 @@ export default function LektionClient({
   const videoBlock = embedUrl ? (
     <iframe
       src={embedUrl}
-      className="w-full aspect-video rounded-lg mb-8"
+      className="w-full aspect-video rounded-xl mb-6"
       allowFullScreen
       title={lektion.title}
     />
   ) : null;
 
   return (
-    <main className="max-w-2xl mx-auto p-6">
+    <div>
+      {/* Back link */}
       <Link
         href="javascript:history.back()"
-        className="text-sm text-blue-600 hover:underline mb-4 block"
+        className="text-[9px] uppercase tracking-[2px] text-gray-mid hover:text-teal transition-colors mb-4 block"
       >
         ← Zurück
       </Link>
-      <h1 className="text-3xl font-bold mb-2">{lektion.title}</h1>
+
+      <h1 className="text-2xl font-bold tracking-tight text-ink mb-1">
+        {lektion.title}
+      </h1>
       {lektion.description && (
-        <p className="text-gray-600 mb-6">{lektion.description}</p>
+        <p className="text-sm text-gray-mid mb-6">{lektion.description}</p>
       )}
 
+      {/* Passed banner */}
       {passed && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-          <p className="text-green-700 font-medium">
-            ✓ Lektion abgeschlossen
-            {badge
-              ? ` — Abzeichen „${badge.icon} ${badge.name}" verdient!`
-              : ""}
+        <div className="bg-white border border-teal/30 rounded-xl p-4 mb-6 flex items-center gap-3">
+          <span className="text-teal text-xl">✓</span>
+          <p className="text-sm font-medium text-teal">
+            Lektion abgeschlossen
+            {badge ? ` — ${badge.icon} ${badge.name} verdient!` : ""}
           </p>
         </div>
       )}
@@ -95,7 +99,7 @@ export default function LektionClient({
       {/* Text-Content */}
       {lektion.content && (
         <div
-          className="prose prose-sm max-w-none mb-8"
+          className="prose prose-sm max-w-none mb-8 text-ink/70"
           dangerouslySetInnerHTML={{ __html: lektion.content }}
         />
       )}
@@ -105,81 +109,86 @@ export default function LektionClient({
 
       {/* Quiz */}
       {questions.length > 0 && !passed && (
-        <section className="mt-8">
+        <section className="mt-6">
           {isLocked && (
-            <p className="text-orange-600 text-sm mb-4">
+            <p className="text-sm text-orange-600 bg-orange-50 border border-orange-200 rounded-lg px-4 py-3 mb-4">
               Nächster Versuch möglich ab{" "}
               {new Date(lockedUntil!).toLocaleString("de-DE")}.
             </p>
           )}
+
           {!showQuiz ? (
             <button
               onClick={() => setShowQuiz(true)}
               disabled={Boolean(isLocked)}
-              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-teal text-teal-light font-bold text-xs uppercase tracking-[1.5px] rounded-lg py-3 hover:bg-teal/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              Test starten
+              Quiz starten
             </button>
           ) : (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Test</h2>
+            <div className="flex flex-col gap-4">
               {questions.map((q, qi) => (
-                <div key={q.id} className="mb-6">
-                  <p className="font-medium mb-2">
+                <div
+                  key={q.id}
+                  className="bg-white border border-border rounded-xl p-4"
+                >
+                  <p className="text-sm font-semibold text-ink mb-3">
                     {qi + 1}. {q.question}
                   </p>
                   <div className="flex flex-col gap-2">
                     {q.options.map((opt, oi) => (
-                      <label
+                      <button
                         key={oi}
-                        className="flex items-center gap-2 cursor-pointer"
+                        type="button"
+                        onClick={() => {
+                          const next = [...quizAnswers];
+                          next[qi] = oi;
+                          setQuizAnswers(next);
+                        }}
+                        className={`text-left text-sm px-4 py-2.5 rounded-lg border transition-all ${
+                          quizAnswers[qi] === oi
+                            ? "border-teal bg-teal/5 text-teal font-semibold"
+                            : "border-border text-gray-mid hover:border-teal/50"
+                        }`}
                       >
-                        <input
-                          type="radio"
-                          name={`q-${qi}`}
-                          checked={quizAnswers[qi] === oi}
-                          onChange={() => {
-                            const next = [...quizAnswers];
-                            next[qi] = oi;
-                            setQuizAnswers(next);
-                          }}
-                          className="w-4 h-4"
-                        />
                         {opt}
-                      </label>
+                      </button>
                     ))}
                   </div>
                 </div>
               ))}
+
               {quizResult ? (
                 <div
-                  className={`rounded-lg p-4 border ${
+                  className={`border rounded-xl p-4 ${
                     quizResult.passed
-                      ? "bg-green-50 border-green-200"
-                      : "bg-red-50 border-red-200"
+                      ? "border-teal/30 bg-white"
+                      : "border-red-200 bg-red-50"
                   }`}
                 >
-                  <p className="font-semibold">
-                    {quizResult.passed ? "✓ Bestanden!" : "✗ Nicht bestanden."}
-                  </p>
-                  <p className="text-sm mt-1">
-                    Ergebnis: {Math.round(quizResult.score * 100)}%
-                    {!quizResult.passed && " — Nächster Versuch in 24 Stunden."}
+                  <p
+                    className={`font-bold text-sm ${
+                      quizResult.passed ? "text-teal" : "text-red-700"
+                    }`}
+                  >
+                    {quizResult.passed
+                      ? `✓ Bestanden! ${Math.round(quizResult.score * 100)}% richtig`
+                      : `✗ Nicht bestanden (${Math.round(quizResult.score * 100)}%). Versuche es morgen erneut.`}
                   </p>
                 </div>
               ) : (
                 <button
                   onClick={submitQuiz}
-                  disabled={loading}
-                  className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                  disabled={loading || quizAnswers.some((a) => a === null)}
+                  className="w-full bg-teal text-teal-light font-bold text-xs uppercase tracking-[1.5px] rounded-lg py-3 hover:bg-teal/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
-                  {loading ? "Auswerten..." : "Abgeben"}
+                  {loading ? "Auswerten…" : "Abgeben →"}
                 </button>
               )}
             </div>
           )}
         </section>
       )}
-    </main>
+    </div>
   );
 }

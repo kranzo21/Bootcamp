@@ -46,60 +46,111 @@ export default async function ProgramPage({
     lektionProgress.filter((p) => p.passed).map((p) => p.lektion_id),
   );
 
-  const tabs = [
-    { key: "gewaechshaus", label: "Gewächshaus" },
-    { key: "tutorials", label: "Tutorials" },
-    { key: "ressourcen", label: "Ressourcen" },
-  ];
-
   return (
-    <main className="max-w-3xl mx-auto p-6">
-      <Link
-        href="/dashboard"
-        className="text-sm text-blue-600 hover:underline mb-4 block"
-      >
-        ← Dashboard
-      </Link>
-      <h1 className="text-3xl font-bold mb-2">{program.name}</h1>
-      <p className="text-gray-600 mb-6">{program.description}</p>
+    <div>
+      <h1 className="text-2xl font-bold tracking-tight text-ink mb-1">
+        {program.name}
+      </h1>
+      <p className="text-sm text-gray-mid mb-6">{program.description}</p>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 border-b">
-        {tabs.map((t) => (
-          <Link
-            key={t.key}
-            href={`/programm/${slug}?tab=${t.key}`}
-            className={`px-4 py-2 -mb-px border-b-2 transition ${
-              tab === t.key
-                ? "border-blue-600 text-blue-600 font-medium"
-                : "border-transparent text-gray-500"
-            }`}
+      <div className="flex gap-3 mb-6">
+        {/* Gewächshaus Tab — mit Fortschritt */}
+        <Link
+          href={`/programm/${slug}?tab=gewaechshaus`}
+          className={`flex-1 border rounded-xl p-4 transition hover:shadow-sm ${
+            tab === "gewaechshaus"
+              ? "border-teal bg-teal/5"
+              : "border-border bg-white"
+          }`}
+        >
+          <p
+            className={`font-semibold text-sm mb-2 ${tab === "gewaechshaus" ? "text-teal" : "text-ink"}`}
           >
-            {t.label}
-          </Link>
-        ))}
+            Gewächshaus
+          </p>
+          <div className="w-full bg-border rounded-full h-1.5">
+            <div
+              className="bg-teal h-1.5 rounded-full transition-all"
+              style={{
+                width:
+                  lektionen.length > 0
+                    ? `${Math.round(
+                        (Array.from(passedIds).filter((id) =>
+                          lektionen.some((l) => l.id === id),
+                        ).length /
+                          lektionen.length) *
+                          100,
+                      )}%`
+                    : "0%",
+              }}
+            />
+          </div>
+          <p className="text-[10px] text-gray-mid mt-1">
+            {
+              Array.from(passedIds).filter((id) =>
+                lektionen.some((l) => l.id === id),
+              ).length
+            }{" "}
+            / {lektionen.length} abgeschlossen
+          </p>
+        </Link>
+
+        {/* Tutorials Tab */}
+        <Link
+          href={`/programm/${slug}?tab=tutorials`}
+          className={`flex-1 border rounded-xl p-4 transition hover:shadow-sm flex items-center justify-center ${
+            tab === "tutorials"
+              ? "border-teal bg-teal/5"
+              : "border-border bg-white"
+          }`}
+        >
+          <p
+            className={`font-semibold text-sm ${tab === "tutorials" ? "text-teal" : "text-ink"}`}
+          >
+            Tutorials
+          </p>
+        </Link>
+
+        {/* Ressourcen Tab */}
+        <Link
+          href={`/programm/${slug}?tab=ressourcen`}
+          className={`flex-1 border rounded-xl p-4 transition hover:shadow-sm flex items-center justify-center ${
+            tab === "ressourcen"
+              ? "border-teal bg-teal/5"
+              : "border-border bg-white"
+          }`}
+        >
+          <p
+            className={`font-semibold text-sm ${tab === "ressourcen" ? "text-teal" : "text-ink"}`}
+          >
+            Ressourcen
+          </p>
+        </Link>
       </div>
 
       {/* GEWÄCHSHAUS */}
       {tab === "gewaechshaus" && (
         <div className="flex flex-col gap-3">
           {lektionen.length === 0 && (
-            <p className="text-gray-500">Noch keine Lektionen vorhanden.</p>
+            <p className="text-sm text-gray-mid">
+              Noch keine Lektionen vorhanden.
+            </p>
           )}
           {lektionen.map((l) => (
             <Link
               key={l.id}
               href={`/lektion/${l.id}`}
-              className="border rounded-lg p-4 hover:shadow transition flex items-center justify-between"
+              className="bg-white border border-border rounded-xl p-4 hover:shadow-sm transition-shadow flex items-center justify-between"
             >
               <div>
-                <h3 className="font-semibold">{l.title}</h3>
+                <h3 className="font-semibold text-ink">{l.title}</h3>
                 {l.description && (
-                  <p className="text-sm text-gray-500">{l.description}</p>
+                  <p className="text-sm text-gray-mid">{l.description}</p>
                 )}
               </div>
               {passedIds.has(l.id) && (
-                <span className="text-green-600 text-xl">✓</span>
+                <span className="text-teal text-xl">✓</span>
               )}
             </Link>
           ))}
@@ -111,6 +162,6 @@ export default async function ProgramPage({
 
       {/* RESSOURCEN */}
       {tab === "ressourcen" && <RessourcenTab ressourcen={ressourcen} />}
-    </main>
+    </div>
   );
 }
