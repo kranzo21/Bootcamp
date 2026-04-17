@@ -64,20 +64,73 @@ export default async function ProgramPage({
       <p className="text-gray-600 mb-6">{program.description}</p>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 border-b">
-        {tabs.map((t) => (
-          <Link
-            key={t.key}
-            href={`/programm/${slug}?tab=${t.key}`}
-            className={`px-4 py-2 -mb-px border-b-2 transition ${
-              tab === t.key
-                ? "border-blue-600 text-blue-600 font-medium"
-                : "border-transparent text-gray-500"
-            }`}
+      <div className="flex gap-3 mb-6">
+        {/* Gewächshaus Tab — mit Fortschritt */}
+        <Link
+          href={`/programm/${slug}?tab=gewaechshaus`}
+          className={`flex-1 border rounded-xl p-4 transition hover:shadow-sm ${
+            tab === "gewaechshaus"
+              ? "border-blue-600 bg-blue-50"
+              : "border-gray-200 bg-white"
+          }`}
+        >
+          <p
+            className={`font-semibold text-sm mb-2 ${tab === "gewaechshaus" ? "text-blue-700" : "text-gray-700"}`}
           >
-            {t.label}
-          </Link>
-        ))}
+            Gewächshaus
+          </p>
+          <div className="w-full bg-gray-200 rounded-full h-1.5">
+            <div
+              className="bg-blue-500 h-1.5 rounded-full transition-all"
+              style={{
+                width:
+                  lektionen.length > 0
+                    ? `${Math.round((Array.from(passedIds).filter((id) => lektionen.some((l) => l.id === id)).length / lektionen.length) * 100)}%`
+                    : "0%",
+              }}
+            />
+          </div>
+          <p className="text-xs text-gray-500 mt-1">
+            {
+              Array.from(passedIds).filter((id) =>
+                lektionen.some((l) => l.id === id),
+              ).length
+            }{" "}
+            / {lektionen.length} abgeschlossen
+          </p>
+        </Link>
+
+        {/* Tutorials Tab */}
+        <Link
+          href={`/programm/${slug}?tab=tutorials`}
+          className={`flex-1 border rounded-xl p-4 transition hover:shadow-sm flex items-center justify-center ${
+            tab === "tutorials"
+              ? "border-blue-600 bg-blue-50"
+              : "border-gray-200 bg-white"
+          }`}
+        >
+          <p
+            className={`font-semibold text-sm ${tab === "tutorials" ? "text-blue-700" : "text-gray-700"}`}
+          >
+            Tutorials
+          </p>
+        </Link>
+
+        {/* Ressourcen Tab */}
+        <Link
+          href={`/programm/${slug}?tab=ressourcen`}
+          className={`flex-1 border rounded-xl p-4 transition hover:shadow-sm flex items-center justify-center ${
+            tab === "ressourcen"
+              ? "border-blue-600 bg-blue-50"
+              : "border-gray-200 bg-white"
+          }`}
+        >
+          <p
+            className={`font-semibold text-sm ${tab === "ressourcen" ? "text-blue-700" : "text-gray-700"}`}
+          >
+            Ressourcen
+          </p>
+        </Link>
       </div>
 
       {/* GEWÄCHSHAUS */}
