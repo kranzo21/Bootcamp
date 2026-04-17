@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Area, Tutorial, Ressource } from "@/types";
+import InstrumentCard from "@/components/ui/InstrumentCard";
 
 export default async function ProgramPage({
   params,
@@ -33,14 +34,23 @@ export default async function ProgramPage({
   const program = await getProgramBySlug(slug);
   if (!program) notFound();
 
-  const [regularAreas, instrumentAreas, lektionProgress] = await Promise.all([
-    getRegularAreasByProgram(program.id),
-    getInstrumentAreasByProgram(program.id),
-    getLektionProgress(user!.id),
-  ]);
+  const [regularAreas, instrumentAreas, lektionProgress, instrumentFavRows] =
+    await Promise.all([
+      getRegularAreasByProgram(program.id),
+      getInstrumentAreasByProgram(program.id),
+      getLektionProgress(user!.id),
+      supabase
+        .from("user_favourites")
+        .select("item_id")
+        .eq("user_id", user!.id)
+        .eq("item_type", "instrument"),
+    ]);
 
   const passedIds = new Set(
     lektionProgress.filter((p) => p.passed).map((p) => p.lektion_id),
+  );
+  const favInstrumentIds = new Set(
+    (instrumentFavRows.data ?? []).map((r: { item_id: string }) => r.item_id),
   );
 
   let lektionenByArea: Record<string, { id: string; area_id: string }[]> = {};
@@ -164,18 +174,14 @@ export default async function ProgramPage({
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {instrumentAreas.map((area: Area) => (
-                  <Link
+                  <InstrumentCard
                     key={area.id}
-                    href={`/instrument/${area.slug}`}
-                    className="bg-white border border-border rounded-xl p-4 hover:shadow-sm transition-shadow text-center"
-                  >
-                    <p className="font-semibold text-ink">{area.name}</p>
-                    {area.description && (
-                      <p className="text-xs text-gray-mid mt-1">
-                        {area.description}
-                      </p>
-                    )}
-                  </Link>
+                    id={area.id}
+                    name={area.name}
+                    slug={area.slug}
+                    description={area.description}
+                    initialFav={favInstrumentIds.has(area.id)}
+                  />
                 ))}
               </div>
             </section>
