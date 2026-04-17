@@ -1,0 +1,69 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* ── FONTS ── */
+@font-face {
+  font-family: "Overused Grotesk";
+  src: url("/fonts/OverusedGrotesk-Light.otf") format("opentype");
+  font-weight: 300;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Overused Grotesk";
+  src: url("/fonts/OverusedGrotesk-Roman.otf") format("opentype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Overused Grotesk";
+  src: url("/fonts/OverusedGrotesk-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Overused Grotesk";
+  src: url("/fonts/OverusedGrotesk-SemiBold.otf") format("opentype");
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Overused Grotesk";
+  src: url("/fonts/OverusedGrotesk-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Perfectly Nineties";
+  src: url("/fonts/PerfectlyNineties-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Perfectly Nineties";
+  src: url("/fonts/PerfectlyNineties-RegularItalic.otf") format("opentype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ── DESIGN TOKENS ── */
+@theme inline {
+  --color-cream: #f4f3ea;
+  --color-ink: #13161c;
+  --color-teal: #0d5251;
+  --color-teal-light: #9bc7be;
+  --color-tan: #b4a282;
+  --color-gray-mid: #87919a;
+  --color-border: #e0ddd4;
+  --font-sans: "Overused Grotesk", system-ui, sans-serif;
+  --font-display: "Perfectly Nineties", serif;
+}
+
+/* ── BASE ── */
+body {
+  background-color: #f4f3ea;
+  color: #13161c;
+  font-family: "Overused Grotesk", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
