@@ -8,66 +8,64 @@ interface Props {
 }
 
 function RessourceCard({ r }: { r: Ressource }) {
+  const [open, setOpen] = useState(false);
   const embedUrl = r.type === "youtube" ? toYouTubeEmbedUrl(r.url) : null;
 
   return (
-    <div className="border rounded-lg p-4">
-      <div className="flex items-center justify-between mb-3">
+    <div className="bg-white border border-border rounded-xl overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-4 py-3 text-left"
+      >
         <div>
-          <h3 className="font-semibold text-sm">{r.title}</h3>
+          <span className="font-semibold text-ink text-sm">{r.title}</span>
           {r.instrument && (
-            <span className="text-xs text-blue-600">{r.instrument}</span>
+            <span className="ml-2 text-xs text-gray-mid">({r.instrument})</span>
           )}
         </div>
-        {r.type !== "youtube" && (
-          <a
-            href={r.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-white bg-blue-600 px-3 py-1 rounded hover:bg-blue-700"
-          >
-            Download
-          </a>
-        )}
-      </div>
+        <span
+          className={`text-gray-mid transition-transform duration-200 flex-shrink-0 ml-3 ${open ? "rotate-180" : ""}`}
+        >
+          ▾
+        </span>
+      </button>
 
-      {r.type === "pdf" && (
-        <iframe
-          src={r.url}
-          className="w-full h-64 rounded border"
-          title={r.title}
-        />
-      )}
-
-      {r.type === "audio" && (
-        <audio controls className="w-full mt-2">
-          <source src={r.url} />
-          <a
-            href={r.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 text-sm"
-          >
-            Audio öffnen
-          </a>
-        </audio>
-      )}
-
-      {r.type === "image" && (
-        <img
-          src={r.url}
-          alt={r.title}
-          className="w-full rounded mt-2 max-h-64 object-contain"
-        />
-      )}
-
-      {r.type === "youtube" && embedUrl && (
-        <iframe
-          src={embedUrl}
-          className="w-full aspect-video rounded mt-2"
-          allowFullScreen
-          title={r.title}
-        />
+      {open && (
+        <div className="px-4 pb-4 border-t border-border pt-3">
+          {r.description && (
+            <p className="text-sm text-gray-mid mb-3">{r.description}</p>
+          )}
+          {r.type === "youtube" && embedUrl && (
+            <iframe
+              src={embedUrl}
+              className="w-full aspect-video rounded-lg"
+              allowFullScreen
+              title={r.title}
+            />
+          )}
+          {r.type === "pdf" && (
+            <a
+              href={r.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-teal border border-teal px-3 py-1.5 rounded-lg hover:bg-teal/5 transition-colors"
+            >
+              📄 PDF öffnen
+            </a>
+          )}
+          {r.type === "audio" && (
+            <audio controls className="w-full">
+              <source src={r.url} />
+            </audio>
+          )}
+          {r.type === "image" && (
+            <img
+              src={r.url}
+              alt={r.title}
+              className="w-full rounded-lg max-h-64 object-contain"
+            />
+          )}
+        </div>
       )}
     </div>
   );

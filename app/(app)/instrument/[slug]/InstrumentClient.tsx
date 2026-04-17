@@ -16,6 +16,79 @@ interface Props {
   initialFavIds: string[];
 }
 
+function RessourceItem({
+  r,
+  initialFav,
+}: {
+  r: Ressource;
+  initialFav: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const embedUrl = r.type === "youtube" ? toYouTubeEmbedUrl(r.url) : null;
+
+  return (
+    <div className="bg-white border border-border rounded-xl overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-4 py-3 text-left"
+      >
+        <span className="font-semibold text-ink">{r.title}</span>
+        <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+          <FavouriteButton
+            itemType="ressource"
+            itemId={r.id}
+            initialFav={initialFav}
+          />
+          <span
+            className={`text-gray-mid transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          >
+            ▾
+          </span>
+        </div>
+      </button>
+
+      {open && (
+        <div className="px-4 pb-4 border-t border-border pt-3">
+          {r.description && (
+            <p className="text-sm text-gray-mid mb-3">{r.description}</p>
+          )}
+          {r.type === "youtube" && embedUrl && (
+            <iframe
+              src={embedUrl}
+              className="w-full aspect-video rounded-lg"
+              allowFullScreen
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              title={r.title}
+            />
+          )}
+          {r.type === "pdf" && (
+            <a
+              href={r.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-teal border border-teal px-3 py-1.5 rounded-lg hover:bg-teal/5 transition-colors"
+            >
+              📄 PDF öffnen
+            </a>
+          )}
+          {r.type === "audio" && (
+            <audio controls className="w-full">
+              <source src={r.url} />
+            </audio>
+          )}
+          {r.type === "image" && (
+            <img
+              src={r.url}
+              alt={r.title}
+              className="w-full rounded-lg max-h-64 object-contain"
+            />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function InstrumentClient({
   area,
   programSlug,
@@ -89,82 +162,19 @@ export default function InstrumentClient({
 
       {/* Ressourcen */}
       {tab === "ressourcen" && (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
           {ressourcen.length === 0 && (
             <p className="text-gray-mid text-sm">
               Noch keine Ressourcen vorhanden.
             </p>
           )}
-          {ressourcen.map((r) => {
-            const embedUrl =
-              r.type === "youtube" ? toYouTubeEmbedUrl(r.url) : null;
-
-            return (
-              <div
-                key={r.id}
-                className="bg-white border border-border rounded-xl p-4"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <h3 className="font-semibold text-ink">{r.title}</h3>
-                    {r.description && (
-                      <p className="text-sm text-gray-mid">{r.description}</p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 ml-3 flex-shrink-0">
-                    {r.type !== "youtube" && (
-                      <a
-                        href={r.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-teal border border-teal px-3 py-1 rounded-lg hover:bg-teal/5 transition-colors"
-                      >
-                        {r.type === "pdf"
-                          ? "📄 Download"
-                          : r.type === "audio"
-                            ? "🎵 Öffnen"
-                            : "🖼️ Ansehen"}
-                      </a>
-                    )}
-                    <FavouriteButton
-                      itemType="ressource"
-                      itemId={r.id}
-                      initialFav={initialFavIds.includes(r.id)}
-                    />
-                  </div>
-                </div>
-
-                {r.type === "youtube" && embedUrl && (
-                  <iframe
-                    src={embedUrl}
-                    className="w-full aspect-video rounded-lg"
-                    allowFullScreen
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    title={r.title}
-                  />
-                )}
-                {r.type === "pdf" && (
-                  <iframe
-                    src={r.url}
-                    className="w-full h-64 rounded-lg border border-border"
-                    title={r.title}
-                  />
-                )}
-                {r.type === "audio" && (
-                  <audio controls className="w-full mt-2">
-                    <source src={r.url} />
-                  </audio>
-                )}
-                {r.type === "image" && (
-                  <img
-                    src={r.url}
-                    alt={r.title}
-                    className="w-full rounded-lg mt-2 max-h-64 object-contain"
-                  />
-                )}
-              </div>
-            );
-          })}
+          {ressourcen.map((r) => (
+            <RessourceItem
+              key={r.id}
+              r={r}
+              initialFav={initialFavIds.includes(r.id)}
+            />
+          ))}
         </div>
       )}
     </div>
