@@ -44,6 +44,8 @@ export default async function ProgramPage({
   );
 
   let lektionenByArea: Record<string, { id: string; area_id: string }[]> = {};
+  let totalLektionen = 0;
+  let totalPassed = 0;
   let favTutorials: Tutorial[] = [];
   let favRessourcen: Ressource[] = [];
   let userInstruments: string[] = [];
@@ -56,6 +58,8 @@ export default async function ProgramPage({
         (l) => l.area_id === area.id,
       );
     }
+    totalLektionen = allLektionen.length;
+    totalPassed = allLektionen.filter((l) => passedIds.has(l.id)).length;
   } else {
     const [tutorials, ressourcen, profile] = await Promise.all([
       getUserFavouriteTutorials(user!.id),
@@ -67,6 +71,9 @@ export default async function ProgramPage({
     userInstruments = (profile.data?.instruments as string[]) ?? [];
   }
 
+  const totalPct =
+    totalLektionen > 0 ? Math.round((totalPassed / totalLektionen) * 100) : 0;
+
   return (
     <div>
       <h1 className="text-2xl font-bold tracking-tight text-ink mb-1">
@@ -74,21 +81,48 @@ export default async function ProgramPage({
       </h1>
       <p className="text-sm text-gray-mid mb-6">{program.description}</p>
 
-      {/* Tab-Leiste */}
-      <div className="flex gap-2 mb-6 border-b border-border">
-        {(["allgemein", "mein-bereich"] as const).map((t) => (
-          <Link
-            key={t}
-            href={`/programm/${slug}?tab=${t}`}
-            className={`px-4 py-2 -mb-px border-b-2 text-sm font-medium transition ${
-              tab === t
-                ? "border-teal text-teal"
-                : "border-transparent text-gray-mid hover:text-ink"
-            }`}
+      {/* Tab-Leiste — abgerundete Karten */}
+      <div className="flex gap-3 mb-6">
+        {/* Allgemein — mit Gesamtfortschritt */}
+        <Link
+          href={`/programm/${slug}?tab=allgemein`}
+          className={`flex-1 border rounded-xl p-4 transition hover:shadow-sm ${
+            tab === "allgemein"
+              ? "border-teal bg-teal/5"
+              : "border-border bg-white"
+          }`}
+        >
+          <p
+            className={`font-semibold text-sm mb-2 ${tab === "allgemein" ? "text-teal" : "text-ink"}`}
           >
-            {t === "allgemein" ? "Allgemein" : "Mein Bereich"}
-          </Link>
-        ))}
+            Allgemein
+          </p>
+          <div className="w-full bg-border rounded-full h-1.5">
+            <div
+              className="bg-teal h-1.5 rounded-full transition-all"
+              style={{ width: `${totalPct}%` }}
+            />
+          </div>
+          <p className="text-xs text-gray-mid mt-1">
+            {totalPassed} / {totalLektionen} abgeschlossen
+          </p>
+        </Link>
+
+        {/* Mein Bereich */}
+        <Link
+          href={`/programm/${slug}?tab=mein-bereich`}
+          className={`flex-1 border rounded-xl p-4 transition hover:shadow-sm flex items-center justify-center ${
+            tab === "mein-bereich"
+              ? "border-teal bg-teal/5"
+              : "border-border bg-white"
+          }`}
+        >
+          <p
+            className={`font-semibold text-sm ${tab === "mein-bereich" ? "text-teal" : "text-ink"}`}
+          >
+            Mein Bereich
+          </p>
+        </Link>
       </div>
 
       {/* ─── ALLGEMEIN ─── */}

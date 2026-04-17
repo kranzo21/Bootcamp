@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Ecclesia LMS — User Flow</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f0f4f8;
+        padding: 40px 20px;
+        min-height: 100vh;
+      }
+      h1 {
+        text-align: center;
+        font-size: 22px;
+        color: #1a202c;
+        margin-bottom: 40px;
+        letter-spacing: -0.3px;
+      }
+
+      /* ── Layout ── */
+      .map {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+      }
+
+      /* ── Nodes ── */
+      .node {
+        border-radius: 12px;
+        padding: 10px 18px;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: center;
+        white-space: nowrap;
+        position: relative;
+        z-index: 1;
+      }
+      .root {
+        background: #2563eb;
+        color: #fff;
+        font-size: 16px;
+        padding: 14px 28px;
+        border-radius: 16px;
+      }
+      .auth {
+        background: #7c3aed;
+        color: #fff;
+      }
+      .app {
+        background: #0891b2;
+        color: #fff;
+      }
+      .admin {
+        background: #dc2626;
+        color: #fff;
+      }
+      .page {
+        background: #fff;
+        color: #374151;
+        border: 2px solid #e5e7eb;
+        font-weight: 500;
+      }
+      .sub {
+        background: #f9fafb;
+        color: #6b7280;
+        border: 1.5px solid #e5e7eb;
+        font-size: 11.5px;
+        font-weight: 400;
+        border-radius: 8px;
+        padding: 6px 12px;
+      }
+      .badge {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1.5px solid #fde68a;
+        font-size: 11px;
+        border-radius: 20px;
+        padding: 4px 10px;
+        font-weight: 500;
+      }
+
+      /* ── Row / Columns ── */
+      .row {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        justify-content: center;
+        width: 100%;
+      }
+      .col {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+      }
+
+      /* ── Connector lines (CSS) ── */
+      .line-down {
+        width: 2px;
+        height: 28px;
+        background: #cbd5e1;
+        margin: 0 auto;
+      }
+      .line-down-short {
+        width: 2px;
+        height: 16px;
+        background: #cbd5e1;
+        margin: 0 auto;
+      }
+      .line-h {
+        height: 2px;
+        background: #cbd5e1;
+        align-self: stretch;
+        margin-top: -1px; /* align with connector */
+      }
+
+      /* Horizontal bridge between siblings */
+      .bridge {
+        display: flex;
+        align-items: flex-start;
+        position: relative;
+      }
+      .bridge::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        height: 2px;
+        background: #cbd5e1;
+        width: calc(100% - 80px);
+      }
+
+      /* ── Section boxes ── */
+      .section {
+        background: #fff;
+        border-radius: 16px;
+        border: 1.5px solid #e5e7eb;
+        padding: 20px 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+        min-width: 160px;
+      }
+      .section-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        color: #9ca3af;
+        margin-bottom: 12px;
+      }
+
+      /* ── Top-level group row ── */
+      .top-row {
+        display: flex;
+        gap: 32px;
+        align-items: flex-start;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+      }
+
+      /* sub-items list inside a section */
+      .items {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+      }
+
+      /* arrow label */
+      .arrow-label {
+        font-size: 10px;
+        color: #9ca3af;
+        margin: 2px 0;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Ecclesia LMS — User Flow</h1>
+
+    <div class="map">
+      <!-- ROOT -->
+      <div class="node root">Ecclesia LMS</div>
+      <div class="line-down"></div>
+
+      <!-- THREE MAIN BRANCHES -->
+      <div class="top-row">
+        <!-- ── AUTH ── -->
+        <div class="group">
+          <div class="node auth">Auth</div>
+          <div class="line-down"></div>
+          <div class="section">
+            <div class="col">
+              <div class="node page">/login</div>
+              <div class="line-down-short"></div>
+              <div class="node sub">E-Mail + Passwort</div>
+            </div>
+            <div class="line-down"></div>
+            <div class="col">
+              <div class="node page">/registrieren</div>
+              <div class="line-down-short"></div>
+              <div class="node sub">Name, E-Mail, Passwort</div>
+              <div class="line-down-short"></div>
+              <div class="node sub">Programm wählen</div>
+              <div class="line-down-short"></div>
+              <div class="node sub">Instrumente (optional)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── APP (main) ── -->
+        <div class="group">
+          <div class="node app">App (eingeloggt)</div>
+          <div class="line-down"></div>
+          <div class="section">
+            <!-- Dashboard -->
+            <div class="col">
+              <div class="node page">/dashboard</div>
+              <div class="line-down-short"></div>
+              <div style="display: flex; gap: 8px">
+                <div class="node sub">Programme</div>
+                <div class="node sub">Abzeichen</div>
+                <div class="node sub">Qualifikationen</div>
+              </div>
+            </div>
+            <div class="line-down"></div>
+
+            <!-- Programm -->
+            <div class="col">
+              <div class="node page">/programm/[slug]</div>
+              <div class="line-down-short"></div>
+              <div style="display: flex; gap: 8px; align-items: flex-start">
+                <div class="col">
+                  <div class="node badge">Tab: Allgemein</div>
+                  <div class="line-down-short"></div>
+                  <div class="node sub">Bereiche + Fortschritt</div>
+                  <div class="line-down-short"></div>
+                  <div class="node sub">Instrumente-Grid</div>
+                </div>
+                <div class="col">
+                  <div class="node badge">Tab: Mein Bereich</div>
+                  <div class="line-down-short"></div>
+                  <div class="node sub">★ Favoriten</div>
+                  <div class="line-down-short"></div>
+                  <div class="node sub">Meine Instrumente</div>
+                </div>
+              </div>
+            </div>
+            <div class="line-down"></div>
+
+            <!-- 3 sub-pages -->
+            <div style="display: flex; gap: 16px; align-items: flex-start">
+              <!-- Bereich -->
+              <div class="col">
+                <div class="node page">/bereich/[slug]</div>
+                <div class="line-down-short"></div>
+                <div class="node sub">Lektionen-Liste</div>
+                <div class="line-down-short"></div>
+                <div class="node page">/lektion/[id]</div>
+                <div class="line-down-short"></div>
+                <div class="node sub">Videos / Texte</div>
+                <div class="line-down-short"></div>
+                <div class="node sub">Quiz (4 Optionen)</div>
+                <div class="line-down-short"></div>
+                <div class="node badge">→ Abzeichen</div>
+              </div>
+
+              <!-- Instrument -->
+              <div class="col">
+                <div class="node page">/instrument/[slug]</div>
+                <div class="line-down-short"></div>
+                <div style="display: flex; gap: 8px">
+                  <div class="col">
+                    <div class="node badge">Tutorials</div>
+                    <div class="line-down-short"></div>
+                    <div class="node sub">★ Favorit</div>
+                    <div class="line-down-short"></div>
+                    <div class="node page">/tutorial/[id]</div>
+                  </div>
+                  <div class="col">
+                    <div class="node badge">Ressourcen</div>
+                    <div class="line-down-short"></div>
+                    <div class="node sub">★ Favorit</div>
+                    <div class="line-down-short"></div>
+                    <div class="node sub">Link / PDF / Doc</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Einstellungen -->
+              <div class="col">
+                <div class="node page">/einstellungen</div>
+                <div class="line-down-short"></div>
+                <div class="node sub">Name & E-Mail</div>
+                <div class="line-down-short"></div>
+                <div class="node sub">Instrumente ändern</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── ADMIN ── -->
+        <div class="group">
+          <div class="node admin">Admin</div>
+          <div class="line-down"></div>
+          <div class="section">
+            <div class="col">
+              <div class="node page">/admin</div>
+              <div class="line-down"></div>
+              <div style="display: flex; gap: 10px; align-items: flex-start">
+                <div class="col">
+                  <div class="node sub">Nutzer</div>
+                  <div class="line-down-short"></div>
+                  <div class="node sub">Programme</div>
+                  <div class="line-down-short"></div>
+                  <div class="node sub">Abzeichen</div>
+                  <div class="line-down-short"></div>
+                  <div class="node sub">Quals ✓</div>
+                </div>
+                <div class="col">
+                  <div class="node sub">Inhalte</div>
+                  <div class="line-down-short"></div>
+                  <div class="node sub">Lektionen</div>
+                  <div class="line-down-short"></div>
+                  <div class="node sub">Materialien</div>
+                  <div class="line-down-short"></div>
+                  <div class="node sub">Quiz</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
