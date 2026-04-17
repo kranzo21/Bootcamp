@@ -46,6 +46,19 @@ export async function getQuizQuestions(
   return data ?? [];
 }
 
+export async function getLektionenByAreaIds(
+  areaIds: string[],
+): Promise<Lektion[]> {
+  if (!areaIds.length) return [];
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("lektionen")
+    .select("*")
+    .in("area_id", areaIds)
+    .order("order");
+  return data ?? [];
+}
+
 export async function getBadgeByLektion(
   lektionId: string,
 ): Promise<Badge | null> {
