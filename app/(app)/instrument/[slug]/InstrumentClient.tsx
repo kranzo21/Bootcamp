@@ -4,6 +4,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { Area, Tutorial, Ressource } from "@/types";
+import { toYouTubeEmbedUrl } from "@/lib/youtube";
+import FavouriteButton from "@/components/ui/FavouriteButton";
 
 interface Props {
   area: Area;
@@ -23,47 +25,32 @@ export default function InstrumentClient({
   initialFavIds,
 }: Props) {
   const [tab, setTab] = useState<"tutorials" | "ressourcen">("tutorials");
-  const [favIds, setFavIds] = useState<Set<string>>(new Set(initialFavIds));
-  const [loading, setLoading] = useState<string | null>(null);
-
-  async function toggleFav(itemType: "tutorial" | "ressource", itemId: string) {
-    setLoading(itemId);
-    const isFav = favIds.has(itemId);
-    const method = isFav ? "DELETE" : "POST";
-    await fetch("/api/favourites", {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ itemType, itemId }),
-    });
-    const next = new Set(favIds);
-    isFav ? next.delete(itemId) : next.add(itemId);
-    setFavIds(next);
-    setLoading(null);
-  }
 
   return (
-    <main className="max-w-3xl mx-auto p-6">
+    <div>
       <Link
         href={`/programm/${programSlug}`}
-        className="text-sm text-blue-600 hover:underline mb-4 block"
+        className="text-sm text-teal hover:underline mb-4 block"
       >
         ← {programName}
       </Link>
-      <h1 className="text-3xl font-bold mb-6">{area.name}</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-ink mb-6">
+        {area.name}
+      </h1>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 border-b">
+      <div className="flex gap-2 mb-6 border-b border-border">
         {(["tutorials", "ressourcen"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-4 py-2 -mb-px border-b-2 transition capitalize ${
+            className={`px-4 py-2 -mb-px border-b-2 transition text-sm font-medium ${
               tab === t
-                ? "border-blue-600 text-blue-600 font-medium"
-                : "border-transparent text-gray-500"
+                ? "border-teal text-teal"
+                : "border-transparent text-gray-mid hover:text-ink"
             }`}
           >
-            {t.charAt(0).toUpperCase() + t.slice(1)}
+            {t === "tutorials" ? "Tutorials" : "Ressourcen"}
           </button>
         ))}
       </div>
@@ -72,24 +59,29 @@ export default function InstrumentClient({
       {tab === "tutorials" && (
         <div className="flex flex-col gap-3">
           {tutorials.length === 0 && (
-            <p className="text-gray-500">Noch keine Tutorials vorhanden.</p>
+            <p className="text-gray-mid text-sm">
+              Noch keine Tutorials vorhanden.
+            </p>
           )}
           {tutorials.map((t) => (
             <div
               key={t.id}
-              className="border rounded-lg p-4 flex items-center justify-between"
+              className="bg-white border border-border rounded-xl p-4 flex items-center justify-between"
             >
               <Link href={`/tutorial/${t.id}`} className="flex-1">
-                <h3 className="font-semibold hover:text-blue-600">{t.title}</h3>
-                <p className="text-sm text-gray-500">{t.description}</p>
+                <h3 className="font-semibold text-ink hover:text-teal transition-colors">
+                  {t.title}
+                </h3>
+                {t.description && (
+                  <p className="text-sm text-gray-mid">{t.description}</p>
+                )}
               </Link>
-              <button
-                onClick={() => toggleFav("tutorial", t.id)}
-                disabled={loading === t.id}
-                className={`ml-3 text-2xl transition ${favIds.has(t.id) ? "text-yellow-400" : "text-gray-300 hover:text-yellow-300"}`}
-              >
-                ★
-              </button>
+              <FavouriteButton
+                itemType="tutorial"
+                itemId={t.id}
+                initialFav={initialFavIds.includes(t.id)}
+                className="ml-3"
+              />
             </div>
           ))}
         </div>
@@ -97,48 +89,84 @@ export default function InstrumentClient({
 
       {/* Ressourcen */}
       {tab === "ressourcen" && (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           {ressourcen.length === 0 && (
-            <p className="text-gray-500">Noch keine Ressourcen vorhanden.</p>
+            <p className="text-gray-mid text-sm">
+              Noch keine Ressourcen vorhanden.
+            </p>
           )}
-          {ressourcen.map((r) => (
-            <div
-              key={r.id}
-              className="border rounded-lg p-4 flex items-center justify-between"
-            >
-              <a
-                href={r.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 flex items-center gap-3"
+          {ressourcen.map((r) => {
+            const embedUrl =
+              r.type === "youtube" ? toYouTubeEmbedUrl(r.url) : null;
+
+            return (
+              <div
+                key={r.id}
+                className="bg-white border border-border rounded-xl p-4"
               >
-                <span className="text-xl">
-                  {r.type === "pdf"
-                    ? "📄"
-                    : r.type === "audio"
-                      ? "🎵"
-                      : r.type === "image"
-                        ? "🖼️"
-                        : "🔗"}
-                </span>
-                <div>
-                  <h3 className="font-semibold hover:text-blue-600">
-                    {r.title}
-                  </h3>
-                  <p className="text-sm text-gray-500">{r.description}</p>
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 className="font-semibold text-ink">{r.title}</h3>
+                    {r.description && (
+                      <p className="text-sm text-gray-mid">{r.description}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 ml-3 flex-shrink-0">
+                    {r.type !== "youtube" && (
+                      <a
+                        href={r.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-teal border border-teal px-3 py-1 rounded-lg hover:bg-teal/5 transition-colors"
+                      >
+                        {r.type === "pdf"
+                          ? "📄 Download"
+                          : r.type === "audio"
+                            ? "🎵 Öffnen"
+                            : "🖼️ Ansehen"}
+                      </a>
+                    )}
+                    <FavouriteButton
+                      itemType="ressource"
+                      itemId={r.id}
+                      initialFav={initialFavIds.includes(r.id)}
+                    />
+                  </div>
                 </div>
-              </a>
-              <button
-                onClick={() => toggleFav("ressource", r.id)}
-                disabled={loading === r.id}
-                className={`ml-3 text-2xl transition ${favIds.has(r.id) ? "text-yellow-400" : "text-gray-300 hover:text-yellow-300"}`}
-              >
-                ★
-              </button>
-            </div>
-          ))}
+
+                {r.type === "youtube" && embedUrl && (
+                  <iframe
+                    src={embedUrl}
+                    className="w-full aspect-video rounded-lg"
+                    allowFullScreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    title={r.title}
+                  />
+                )}
+                {r.type === "pdf" && (
+                  <iframe
+                    src={r.url}
+                    className="w-full h-64 rounded-lg border border-border"
+                    title={r.title}
+                  />
+                )}
+                {r.type === "audio" && (
+                  <audio controls className="w-full mt-2">
+                    <source src={r.url} />
+                  </audio>
+                )}
+                {r.type === "image" && (
+                  <img
+                    src={r.url}
+                    alt={r.title}
+                    className="w-full rounded-lg mt-2 max-h-64 object-contain"
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
-    </main>
+    </div>
   );
 }
