@@ -22,17 +22,35 @@ export default async function AdminLayout({
   if (!profile?.is_admin) redirect("/dashboard");
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">Admin – Gewächshaus</h1>
-        <Link
-          href="/dashboard"
-          className="text-sm text-blue-600 hover:underline"
-        >
-          Mein Dashboard
-        </Link>
-      </div>
-      {children}
-    </div>
+    <>
+      {/* Admin Navbar */}
+      <nav className="sticky top-0 z-50 bg-ink border-b border-ink/80">
+        <div className="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between">
+          <div className="flex flex-col leading-none">
+            <span className="text-base font-bold tracking-tight text-cream">
+              Ecclesia
+            </span>
+            <span
+              className="text-[7px] text-cream opacity-40 mt-0.5"
+              style={{ letterSpacing: "3.5px", marginLeft: "-3.5px" }}
+            >
+              CHURCH
+            </span>
+          </div>
+          <span className="text-[10px] uppercase tracking-[3px] text-tan font-semibold">
+            Admin
+          </span>
+          <Link
+            href="/dashboard"
+            className="text-[11px] font-medium text-gray-mid hover:text-teal-light transition-colors"
+          >
+            ← Dashboard
+          </Link>
+        </div>
+      </nav>
+
+      {/* Content */}
+      <main className="max-w-5xl mx-auto px-5 py-8">{children}</main>
+    </>
   );
 }
