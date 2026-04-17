@@ -25,7 +25,6 @@ export default function AppNav({ initials, isAdmin }: Props) {
         {/* Nav Links */}
         <div className="flex items-center gap-5">
           <NavLink href="/dashboard">Home</NavLink>
-          <NavLink href="/programm">Programm</NavLink>
           {isAdmin && <NavLink href="/admin">Admin</NavLink>}
         </div>
 
