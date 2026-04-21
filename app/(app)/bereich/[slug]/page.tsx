@@ -31,12 +31,12 @@ export default async function AreaPage({
     supabase.from("users").select("is_admin").eq("id", user!.id).single(),
   ]);
 
-  const lektionen = [...rawLektionen].sort((a, b) =>
-    a.title.localeCompare(b.title, "de", {
-      numeric: true,
-      sensitivity: "base",
-    }),
-  );
+  const extractNum = (title: string) =>
+    parseInt(title.match(/\d+/)?.[0] ?? "0", 10);
+  const lektionen = [...rawLektionen].sort((a, b) => {
+    const diff = extractNum(a.title) - extractNum(b.title);
+    return diff !== 0 ? diff : a.title.localeCompare(b.title, "de");
+  });
 
   const passedIds = new Set(
     progress.filter((p) => p.passed).map((p) => p.lektion_id),
