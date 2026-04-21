@@ -19,11 +19,17 @@ export default async function AdminLektionenPage({
 
   if (!area) notFound();
 
-  const { data: lektionen } = await db
+  const { data: rawLektionen } = await db
     .from("lektionen")
     .select("id, title, status")
-    .eq("area_id", area.id)
-    .order("title");
+    .eq("area_id", area.id);
+
+  const extractNum = (title: string) =>
+    parseInt(title.match(/\d+/)?.[0] ?? "0", 10);
+  const lektionen = (rawLektionen ?? []).sort((a, b) => {
+    const diff = extractNum(a.title) - extractNum(b.title);
+    return diff !== 0 ? diff : a.title.localeCompare(b.title, "de");
+  });
 
   return (
     <main className="max-w-3xl mx-auto p-6">
