@@ -89,7 +89,7 @@ export const getCachedLektionenByArea = unstable_cache(
       }),
     );
   },
-  ["lektionen-by-area"],
+  ["lektionen-by-area-v2"],
   { revalidate: TTL, tags: ["lektionen"] },
 );
 
@@ -109,7 +109,7 @@ export const getCachedLektionenByAreaIds = unstable_cache(
       }),
     );
   },
-  ["lektionen-by-area-ids"],
+  ["lektionen-by-area-ids-v2"],
   { revalidate: TTL, tags: ["lektionen"] },
 );
 
