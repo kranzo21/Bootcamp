@@ -21,9 +21,9 @@ export default async function AdminLektionenPage({
 
   const { data: lektionen } = await db
     .from("lektionen")
-    .select("id, title, status, order")
+    .select("id, title, status")
     .eq("area_id", area.id)
-    .order("order");
+    .order("title");
 
   return (
     <main className="max-w-3xl mx-auto p-6">

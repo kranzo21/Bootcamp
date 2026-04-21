@@ -23,7 +23,6 @@ export default function LektionEditor({ lektionId }: Props) {
   const [videoPosition, setVideoPosition] = useState<"above" | "below">(
     "above",
   );
-  const [order, setOrder] = useState("0");
   const [status, setStatus] = useState<"draft" | "published">("draft");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +51,6 @@ export default function LektionEditor({ lektionId }: Props) {
         setAreaId(data.area_id ?? "");
         setVideoUrl(data.video_url ?? "");
         setVideoPosition(data.video_position ?? "above");
-        setOrder(String(data.order ?? 0));
         setStatus(data.status ?? "published");
         if (data.content) editor.commands.setContent(data.content);
       });
@@ -73,7 +71,6 @@ export default function LektionEditor({ lektionId }: Props) {
       area_id: areaId,
       video_url: videoUrl || null,
       video_position: videoPosition,
-      order: parseInt(order),
       content,
       status: saveStatus,
     };
@@ -169,16 +166,6 @@ export default function LektionEditor({ lektionId }: Props) {
             <option value="below">Unten (nach Text)</option>
           </select>
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Reihenfolge</label>
-          <input
-            type="number"
-            value={order}
-            onChange={(e) => setOrder(e.target.value)}
-            className="border rounded px-3 py-2 w-32"
-          />
-        </div>
-
         {/* Tiptap Editor */}
         <div>
           <label className="block text-sm font-medium mb-2">Inhalt</label>
