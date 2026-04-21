@@ -1,4 +1,4 @@
-import { getTutorialById } from "@/lib/db/programs";
+import { getCachedTutorialById } from "@/lib/db/cached";
 import { toYouTubeEmbedUrl } from "@/lib/youtube";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -9,7 +9,7 @@ export default async function TutorialPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const tutorial = await getTutorialById(id);
+  const tutorial = await getCachedTutorialById(id);
   if (!tutorial) notFound();
 
   const embedUrl = toYouTubeEmbedUrl(tutorial.video_url);

@@ -1,10 +1,10 @@
 // app/(app)/lektion/[id]/page.tsx
 import { createClient } from "@/lib/supabase/server";
 import {
-  getLektionById,
-  getQuizQuestions,
-  getBadgeByLektion,
-} from "@/lib/db/lektionen";
+  getCachedLektionById,
+  getCachedQuizQuestions,
+  getCachedBadgeByLektion,
+} from "@/lib/db/cached";
 import { getLastQuizAttempt } from "@/lib/db/progress";
 import LektionClient from "./LektionClient";
 import { notFound } from "next/navigation";
@@ -21,9 +21,9 @@ export default async function LektionPage({
   } = await supabase.auth.getUser();
 
   const [lektion, questions, badge, lastAttempt] = await Promise.all([
-    getLektionById(id),
-    getQuizQuestions(id),
-    getBadgeByLektion(id),
+    getCachedLektionById(id),
+    getCachedQuizQuestions(id),
+    getCachedBadgeByLektion(id),
     getLastQuizAttempt(user!.id, id),
   ]);
 

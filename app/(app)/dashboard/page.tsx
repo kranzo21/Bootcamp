@@ -1,6 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-import { getPrograms, getAreasByProgram } from "@/lib/db/programs";
-import { getLektionenByArea } from "@/lib/db/lektionen";
+import {
+  getCachedPrograms,
+  getCachedRegularAreasByProgram,
+  getCachedLektionenByAreaIds,
+} from "@/lib/db/cached";
 import {
   getLektionProgress,
   getUserBadges,
@@ -21,35 +24,40 @@ export default async function DashboardPage() {
     .eq("id", user!.id)
     .single();
 
-  const [allPrograms, userPrograms, lektionProgress, userBadgeRows, userQuals] =
-    await Promise.all([
-      getPrograms(),
-      getUserPrograms(user!.id),
-      getLektionProgress(user!.id),
-      getUserBadges(user!.id),
-      getUserQualifications(user!.id),
-    ]);
+  const [allPrograms, userPrograms, lektionProgress] = await Promise.all([
+    getCachedPrograms(),
+    getUserPrograms(user!.id),
+    getLektionProgress(user!.id),
+  ]);
 
   const enrolledProgramIds = new Set(userPrograms.map((up) => up.program_id));
   const enrolledPrograms = allPrograms.filter((p) =>
     enrolledProgramIds.has(p.id),
   );
 
+  // Fetch regular areas for all enrolled programs in parallel
+  const areasByProgram = await Promise.all(
+    enrolledPrograms.map((p) => getCachedRegularAreasByProgram(p.id)),
+  );
+
+  // Collect all area IDs, fetch all lektionen in one query
+  const allAreaIds = areasByProgram.flat().map((a) => a.id);
+  const allLektionen = await getCachedLektionenByAreaIds(allAreaIds);
+  const passedIds = new Set(
+    lektionProgress.filter((p) => p.passed).map((p) => p.lektion_id),
+  );
+
   // Fortschritt pro Programm berechnen
   const progressByProgram: Record<string, { done: number; total: number }> = {};
-  for (const program of enrolledPrograms) {
-    const areas = await getAreasByProgram(program.id);
-    let total = 0;
-    let done = 0;
-    for (const area of areas) {
-      const lektionen = await getLektionenByArea(area.id);
-      total += lektionen.length;
-      const passedIds = new Set(
-        lektionProgress.filter((p) => p.passed).map((p) => p.lektion_id),
-      );
-      done += lektionen.filter((l) => passedIds.has(l.id)).length;
-    }
-    progressByProgram[program.id] = { done, total };
+  for (let i = 0; i < enrolledPrograms.length; i++) {
+    const program = enrolledPrograms[i];
+    const areas = areasByProgram[i];
+    const areaIdSet = new Set(areas.map((a) => a.id));
+    const lektionen = allLektionen.filter((l) => areaIdSet.has(l.area_id));
+    progressByProgram[program.id] = {
+      total: lektionen.length,
+      done: lektionen.filter((l) => passedIds.has(l.id)).length,
+    };
   }
 
   // Abzeichen mit Namen

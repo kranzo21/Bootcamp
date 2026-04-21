@@ -1,7 +1,10 @@
 // app/(app)/bereich/[slug]/page.tsx
 import { createClient } from "@/lib/supabase/server";
-import { getAreaBySlug, getProgramById } from "@/lib/db/programs";
-import { getLektionenByArea } from "@/lib/db/lektionen";
+import {
+  getCachedAreaBySlug,
+  getCachedProgramById,
+  getCachedLektionenByArea,
+} from "@/lib/db/cached";
 import { getLektionProgress } from "@/lib/db/progress";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -18,13 +21,13 @@ export default async function AreaPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const area = await getAreaBySlug(slug);
+  const area = await getCachedAreaBySlug(slug);
   if (!area) notFound();
 
   const [lektionen, progress, program, profileResult] = await Promise.all([
-    getLektionenByArea(area.id),
+    getCachedLektionenByArea(area.id),
     getLektionProgress(user!.id),
-    getProgramById(area.program_id),
+    getCachedProgramById(area.program_id),
     supabase.from("users").select("is_admin").eq("id", user!.id).single(),
   ]);
 

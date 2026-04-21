@@ -1,11 +1,11 @@
 // app/(app)/programm/[slug]/page.tsx
 import { createClient } from "@/lib/supabase/server";
 import {
-  getProgramBySlug,
-  getRegularAreasByProgram,
-  getInstrumentAreasByProgram,
-} from "@/lib/db/programs";
-import { getLektionenByAreaIds } from "@/lib/db/lektionen";
+  getCachedProgramBySlug,
+  getCachedRegularAreasByProgram,
+  getCachedInstrumentAreasByProgram,
+  getCachedLektionenByAreaIds,
+} from "@/lib/db/cached";
 import {
   getLektionProgress,
   getUserFavouriteTutorials,
@@ -31,13 +31,13 @@ export default async function ProgramPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const program = await getProgramBySlug(slug);
+  const program = await getCachedProgramBySlug(slug);
   if (!program) notFound();
 
   const [regularAreas, instrumentAreas, lektionProgress, instrumentFavRows] =
     await Promise.all([
-      getRegularAreasByProgram(program.id),
-      getInstrumentAreasByProgram(program.id),
+      getCachedRegularAreasByProgram(program.id),
+      getCachedInstrumentAreasByProgram(program.id),
       getLektionProgress(user!.id),
       supabase
         .from("user_favourites")
@@ -60,7 +60,7 @@ export default async function ProgramPage({
 
   if (tab === "allgemein") {
     const areaIds = regularAreas.map((a) => a.id);
-    const allLektionen = await getLektionenByAreaIds(areaIds);
+    const allLektionen = await getCachedLektionenByAreaIds(areaIds);
     for (const area of regularAreas) {
       lektionenByArea[area.id] = allLektionen.filter(
         (l) => l.area_id === area.id,

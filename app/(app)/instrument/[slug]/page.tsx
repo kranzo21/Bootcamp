@@ -1,11 +1,11 @@
 // app/(app)/instrument/[slug]/page.tsx
 import { createClient } from "@/lib/supabase/server";
 import {
-  getAreaBySlug,
-  getProgramById,
-  getTutorialsByArea,
-  getRessourcenByArea,
-} from "@/lib/db/programs";
+  getCachedAreaBySlug,
+  getCachedProgramById,
+  getCachedTutorialsByArea,
+  getCachedRessourcenByArea,
+} from "@/lib/db/cached";
 import { getUserFavourites } from "@/lib/db/progress";
 import InstrumentClient from "./InstrumentClient";
 import { notFound } from "next/navigation";
@@ -22,13 +22,13 @@ export default async function InstrumentPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const area = await getAreaBySlug(slug);
+  const area = await getCachedAreaBySlug(slug);
   if (!area) notFound();
 
   const [tutorials, ressourcen, program, favourites] = await Promise.all([
-    getTutorialsByArea(area.id),
-    getRessourcenByArea(area.id),
-    getProgramById(area.program_id),
+    getCachedTutorialsByArea(area.id),
+    getCachedRessourcenByArea(area.id),
+    getCachedProgramById(area.program_id),
     getUserFavourites(user!.id),
   ]);
 
