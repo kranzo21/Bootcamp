@@ -24,12 +24,19 @@ export default async function AreaPage({
   const area = await getCachedAreaBySlug(slug);
   if (!area) notFound();
 
-  const [lektionen, progress, program, profileResult] = await Promise.all([
+  const [rawLektionen, progress, program, profileResult] = await Promise.all([
     getCachedLektionenByArea(area.id),
     getLektionProgress(user!.id),
     getCachedProgramById(area.program_id),
     supabase.from("users").select("is_admin").eq("id", user!.id).single(),
   ]);
+
+  const lektionen = [...rawLektionen].sort((a, b) =>
+    a.title.localeCompare(b.title, "de", {
+      numeric: true,
+      sensitivity: "base",
+    }),
+  );
 
   const passedIds = new Set(
     progress.filter((p) => p.passed).map((p) => p.lektion_id),
