@@ -66,12 +66,20 @@ export default async function AdminLektionenPage({
                 </span>
                 <span className="font-medium text-ink">{l.title}</span>
               </div>
-              <Link
-                href={`/admin/inhalte/bearbeiten?type=lektion&id=${l.id}`}
-                className="text-sm text-teal hover:underline"
-              >
-                Bearbeiten
-              </Link>
+              <div className="flex items-center gap-4">
+                <Link
+                  href={`/admin/inhalte/bearbeiten?type=lektion&id=${l.id}`}
+                  className="text-sm text-teal hover:underline"
+                >
+                  Bearbeiten
+                </Link>
+                <Link
+                  href={`/admin/inhalte/bearbeiten?type=lektion&id=${l.id}#quiz`}
+                  className="text-sm text-gray-mid hover:text-teal hover:underline"
+                >
+                  Quiz
+                </Link>
+              </div>
             </div>
           ))}
         </div>

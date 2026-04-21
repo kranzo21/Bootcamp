@@ -29,6 +29,7 @@ export default function LektionClient({
     passed: boolean;
   } | null>(null);
   const [showQuiz, setShowQuiz] = useState(false);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
   const [loading, setLoading] = useState(false);
 
   const embedUrl = lektion.video_url
@@ -84,12 +85,18 @@ export default function LektionClient({
 
       {/* Passed banner */}
       {passed && (
-        <div className="bg-white border border-teal/30 rounded-xl p-4 mb-6 flex items-center gap-3">
-          <span className="text-teal text-xl">✓</span>
-          <p className="text-sm font-medium text-teal">
-            Lektion abgeschlossen
-            {badge ? ` — ${badge.icon} ${badge.name} verdient!` : ""}
-          </p>
+        <div className="bg-white border border-teal/30 rounded-xl p-5 mb-6 flex flex-col items-center gap-2 text-center">
+          <span className="text-3xl">🎉</span>
+          <p className="font-bold text-teal text-base">Prüfung bestanden!</p>
+          {badge && (
+            <div className="mt-1 flex flex-col items-center gap-1">
+              <span className="text-4xl">{badge.icon}</span>
+              <p className="text-sm font-semibold text-ink">{badge.name}</p>
+              {badge.description && (
+                <p className="text-xs text-gray-mid">{badge.description}</p>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -107,7 +114,7 @@ export default function LektionClient({
       {/* Video unten */}
       {lektion.video_position === "below" && videoBlock}
 
-      {/* Quiz */}
+      {/* Prüfung */}
       {questions.length > 0 && !passed && (
         <section className="mt-6">
           {isLocked && (
@@ -119,67 +126,103 @@ export default function LektionClient({
 
           {!showQuiz ? (
             <button
-              onClick={() => setShowQuiz(true)}
+              onClick={() => {
+                setShowQuiz(true);
+                setCurrentQuestion(0);
+              }}
               disabled={Boolean(isLocked)}
               className="w-full bg-teal text-teal-light font-bold text-xs uppercase tracking-[1.5px] rounded-lg py-3 hover:bg-teal/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              Quiz starten
+              Prüfung absolvieren
             </button>
+          ) : quizResult ? (
+            <div
+              className={`border rounded-xl p-6 text-center ${
+                quizResult.passed
+                  ? "border-teal/30 bg-white"
+                  : "border-red-200 bg-red-50"
+              }`}
+            >
+              {quizResult.passed ? (
+                <>
+                  <p className="text-3xl mb-2">🎉</p>
+                  <p className="font-bold text-teal text-base mb-1">
+                    Bestanden!
+                  </p>
+                  <p className="text-sm text-gray-mid">
+                    {Math.round(quizResult.score * 100)}% richtig
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-3xl mb-2">✗</p>
+                  <p className="font-bold text-red-700 text-base mb-1">
+                    Nicht bestanden
+                  </p>
+                  <p className="text-sm text-gray-mid">
+                    {Math.round(quizResult.score * 100)}% richtig — versuche es
+                    morgen erneut.
+                  </p>
+                </>
+              )}
+            </div>
           ) : (
             <div className="flex flex-col gap-4">
-              {questions.map((q, qi) => (
-                <div
-                  key={q.id}
-                  className="bg-white border border-border rounded-xl p-4"
-                >
-                  <p className="text-sm font-semibold text-ink mb-3">
-                    {qi + 1}. {q.question}
-                  </p>
-                  <div className="flex flex-col gap-2">
-                    {q.options.map((opt, oi) => (
-                      <button
-                        key={oi}
-                        type="button"
-                        onClick={() => {
-                          const next = [...quizAnswers];
-                          next[qi] = oi;
-                          setQuizAnswers(next);
-                        }}
-                        className={`text-left text-sm px-4 py-2.5 rounded-lg border transition-all ${
-                          quizAnswers[qi] === oi
-                            ? "border-teal bg-teal/5 text-teal font-semibold"
-                            : "border-border text-gray-mid hover:border-teal/50"
-                        }`}
-                      >
-                        {opt}
-                      </button>
-                    ))}
-                  </div>
+              {/* Fortschritt */}
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-1.5 bg-border rounded-full">
+                  <div
+                    className="h-1.5 bg-teal rounded-full transition-all"
+                    style={{
+                      width: `${(currentQuestion / questions.length) * 100}%`,
+                    }}
+                  />
                 </div>
-              ))}
+                <span className="text-xs text-gray-mid flex-shrink-0">
+                  {currentQuestion + 1} / {questions.length}
+                </span>
+              </div>
 
-              {quizResult ? (
-                <div
-                  className={`border rounded-xl p-4 ${
-                    quizResult.passed
-                      ? "border-teal/30 bg-white"
-                      : "border-red-200 bg-red-50"
-                  }`}
-                >
-                  <p
-                    className={`font-bold text-sm ${
-                      quizResult.passed ? "text-teal" : "text-red-700"
-                    }`}
-                  >
-                    {quizResult.passed
-                      ? `✓ Bestanden! ${Math.round(quizResult.score * 100)}% richtig`
-                      : `✗ Nicht bestanden (${Math.round(quizResult.score * 100)}%). Versuche es morgen erneut.`}
-                  </p>
+              {/* Aktuelle Frage */}
+              <div className="bg-white border border-border rounded-xl p-5">
+                <p className="text-sm font-semibold text-ink mb-4">
+                  {questions[currentQuestion].question}
+                </p>
+                <div className="flex flex-col gap-2">
+                  {questions[currentQuestion].options.map((opt, oi) => (
+                    <button
+                      key={oi}
+                      type="button"
+                      onClick={() => {
+                        const next = [...quizAnswers];
+                        next[currentQuestion] = oi;
+                        setQuizAnswers(next);
+                      }}
+                      className={`text-left text-sm px-4 py-3 rounded-lg border transition-all ${
+                        quizAnswers[currentQuestion] === oi
+                          ? "border-teal bg-teal/5 text-teal font-semibold"
+                          : "border-border text-gray-mid hover:border-teal/50"
+                      }`}
+                    >
+                      {opt}
+                    </button>
+                  ))}
                 </div>
+              </div>
+
+              {/* Navigation */}
+              {currentQuestion < questions.length - 1 ? (
+                <button
+                  onClick={() => setCurrentQuestion((q) => q + 1)}
+                  disabled={quizAnswers[currentQuestion] === null}
+                  className="w-full bg-teal text-teal-light font-bold text-xs uppercase tracking-[1.5px] rounded-lg py-3 hover:bg-teal/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  Weiter →
+                </button>
               ) : (
                 <button
                   onClick={submitQuiz}
-                  disabled={loading || quizAnswers.some((a) => a === null)}
+                  disabled={loading || quizAnswers[currentQuestion] === null}
                   className="w-full bg-teal text-teal-light font-bold text-xs uppercase tracking-[1.5px] rounded-lg py-3 hover:bg-teal/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   {loading ? "Auswerten…" : "Abgeben →"}

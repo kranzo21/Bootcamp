@@ -259,7 +259,9 @@ export default function LektionEditor({ lektionId }: Props) {
       )}
 
       {isEdit && lektionId && (
-        <QuizEditor lektionId={lektionId} initialQuestions={quizQuestions} />
+        <div id="quiz">
+          <QuizEditor lektionId={lektionId} initialQuestions={quizQuestions} />
+        </div>
       )}
     </main>
   );
