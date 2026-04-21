@@ -82,7 +82,7 @@ export const getCachedLektionenByArea = unstable_cache(
       .select("*")
       .eq("area_id", areaId)
       .eq("status", "published")
-      .order("order");
+      .order("title");
     return data ?? [];
   },
   ["lektionen-by-area"],
@@ -98,7 +98,7 @@ export const getCachedLektionenByAreaIds = unstable_cache(
       .select("*")
       .in("area_id", areaIds)
       .eq("status", "published")
-      .order("order");
+      .order("title");
     return data ?? [];
   },
   ["lektionen-by-area-ids"],
