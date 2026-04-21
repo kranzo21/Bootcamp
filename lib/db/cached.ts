@@ -81,9 +81,13 @@ export const getCachedLektionenByArea = unstable_cache(
       .from("lektionen")
       .select("*")
       .eq("area_id", areaId)
-      .eq("status", "published")
-      .order("title");
-    return data ?? [];
+      .eq("status", "published");
+    return (data ?? []).sort((a, b) =>
+      a.title.localeCompare(b.title, undefined, {
+        numeric: true,
+        sensitivity: "base",
+      }),
+    );
   },
   ["lektionen-by-area"],
   { revalidate: TTL, tags: ["lektionen"] },
@@ -97,9 +101,13 @@ export const getCachedLektionenByAreaIds = unstable_cache(
       .from("lektionen")
       .select("*")
       .in("area_id", areaIds)
-      .eq("status", "published")
-      .order("title");
-    return data ?? [];
+      .eq("status", "published");
+    return (data ?? []).sort((a, b) =>
+      a.title.localeCompare(b.title, undefined, {
+        numeric: true,
+        sensitivity: "base",
+      }),
+    );
   },
   ["lektionen-by-area-ids"],
   { revalidate: TTL, tags: ["lektionen"] },
