@@ -9,7 +9,7 @@ export async function getLektionenByArea(areaId: string): Promise<Lektion[]> {
     .select("*")
     .eq("area_id", areaId)
     .eq("status", "published")
-    .order("order");
+    .order("title");
   return data ?? [];
 }
 
@@ -57,7 +57,7 @@ export async function getLektionenByAreaIds(
     .select("*")
     .in("area_id", areaIds)
     .eq("status", "published")
-    .order("order");
+    .order("title");
   return data ?? [];
 }
 
