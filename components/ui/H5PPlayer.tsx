@@ -2,10 +2,11 @@
 import { useEffect, useRef } from "react";
 
 interface Props {
-  contentPath: string; // e.g. "/h5p-content/mein-quiz"
+  contentPath: string;
+  onComplete?: () => void;
 }
 
-export default function H5PPlayer({ contentPath }: Props) {
+export default function H5PPlayer({ contentPath, onComplete }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
 
@@ -13,7 +14,6 @@ export default function H5PPlayer({ contentPath }: Props) {
     if (!containerRef.current || initializedRef.current) return;
     initializedRef.current = true;
 
-    // Unique ID per instance
     const id = `h5p-${Math.random().toString(36).slice(2)}`;
     containerRef.current.id = id;
 
@@ -23,8 +23,19 @@ export default function H5PPlayer({ contentPath }: Props) {
         frameJs: "/h5p-assets/frame.bundle.js",
         frameCss: "/h5p-assets/styles/h5p.css",
       });
+
+      if (onComplete) {
+        const H5PGlobal = (window as any).H5P;
+        if (H5PGlobal?.externalDispatcher) {
+          H5PGlobal.externalDispatcher.on("xAPI", (event: any) => {
+            if (event?.data?.statement?.result?.success === true) {
+              onComplete();
+            }
+          });
+        }
+      }
     });
-  }, [contentPath]);
+  }, [contentPath, onComplete]);
 
   return (
     <div className="w-full rounded-xl overflow-hidden border border-border">

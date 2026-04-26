@@ -203,6 +203,45 @@ export const getCachedProgramById = unstable_cache(
   { revalidate: TTL, tags: ["programs"] },
 );
 
+export const getCachedGewächshausWalkthrough = unstable_cache(
+  async () => {
+    const db = createAdminClient();
+
+    const { data: area } = await db
+      .from("areas")
+      .select("id")
+      .eq("slug", "gewaechshaus")
+      .single();
+
+    if (!area) return { lektionen: [], modules: [] };
+
+    const [{ data: modules }, { data: lektionen }] = await Promise.all([
+      db.from("modules").select("*").eq("area_id", area.id).order("order"),
+      db
+        .from("lektionen")
+        .select("*")
+        .eq("area_id", area.id)
+        .eq("status", "published"),
+    ]);
+
+    const modulesData = (modules ?? []) as import("@/types").Module[];
+    const lektionenData = (lektionen ?? []) as import("@/types").Lektion[];
+
+    const moduleOrderMap = new Map(modulesData.map((m) => [m.id, m.order]));
+
+    const sorted = [...lektionenData].sort((a, b) => {
+      const ma = moduleOrderMap.get(a.module_id ?? "") ?? 999;
+      const mb = moduleOrderMap.get(b.module_id ?? "") ?? 999;
+      if (ma !== mb) return ma - mb;
+      return a.order - b.order;
+    });
+
+    return { lektionen: sorted, modules: modulesData };
+  },
+  ["gewächshaus-walkthrough"],
+  { revalidate: 60, tags: ["lektionen", "modules"] },
+);
+
 export const getCachedModulesByArea = unstable_cache(
   async (areaId: string) => {
     const db = createAdminClient();
