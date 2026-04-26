@@ -24,6 +24,8 @@ export default function LektionEditor({ lektionId }: Props) {
     "above",
   );
   const [h5pContentPath, setH5pContentPath] = useState("");
+  const [moduleId, setModuleId] = useState("");
+  const [modules, setModules] = useState<{ id: string; name: string }[]>([]);
   const [order, setOrder] = useState("0");
   const [status, setStatus] = useState<"draft" | "published">("draft");
   const [saving, setSaving] = useState(false);
@@ -44,6 +46,14 @@ export default function LektionEditor({ lektionId }: Props) {
   }, []);
 
   useEffect(() => {
+    if (!areaId) return;
+    fetch(`/api/admin/modules-list?areaId=${areaId}`)
+      .then((r) => r.json())
+      .then(setModules)
+      .catch(() => {});
+  }, [areaId]);
+
+  useEffect(() => {
     if (!isEdit || !lektionId || !editor) return;
     fetch(`/api/admin/content-get?table=lektionen&id=${lektionId}`)
       .then((r) => r.json())
@@ -54,6 +64,7 @@ export default function LektionEditor({ lektionId }: Props) {
         setVideoUrl(data.video_url ?? "");
         setVideoPosition(data.video_position ?? "above");
         setH5pContentPath(data.h5p_content_path ?? "");
+        setModuleId(data.module_id ?? "");
         setOrder(String(data.order ?? 0));
         setStatus(data.status ?? "published");
         if (data.content) editor.commands.setContent(data.content);
@@ -76,6 +87,7 @@ export default function LektionEditor({ lektionId }: Props) {
       video_url: videoUrl || null,
       video_position: videoPosition,
       h5p_content_path: h5pContentPath || null,
+      module_id: moduleId || null,
       order: parseInt(order),
       content,
       status: saveStatus,
@@ -146,6 +158,24 @@ export default function LektionEditor({ lektionId }: Props) {
             />
           )}
         </div>
+        {modules.length > 0 && (
+          <div>
+            <label className="block text-sm font-medium mb-1">Modul</label>
+            <select
+              value={moduleId}
+              onChange={(e) => setModuleId(e.target.value)}
+              className="border rounded px-3 py-2 w-full"
+            >
+              <option value="">— Kein Modul —</option>
+              {modules.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div>
           <label className="block text-sm font-medium mb-1">
             YouTube-URL (optional)

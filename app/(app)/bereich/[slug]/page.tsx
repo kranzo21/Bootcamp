@@ -4,6 +4,7 @@ import {
   getCachedAreaBySlug,
   getCachedProgramById,
   getCachedLektionenByArea,
+  getCachedModulesByArea,
 } from "@/lib/db/cached";
 import { getLektionProgress } from "@/lib/db/progress";
 import Link from "next/link";
@@ -25,12 +26,14 @@ export default async function AreaPage({
   const area = await getCachedAreaBySlug(slug);
   if (!area) notFound();
 
-  const [lektionen, progress, program, profileResult] = await Promise.all([
-    getCachedLektionenByArea(area.id),
-    getLektionProgress(user!.id),
-    getCachedProgramById(area.program_id),
-    supabase.from("users").select("is_admin").eq("id", user!.id).single(),
-  ]);
+  const [lektionen, progress, program, profileResult, modules] =
+    await Promise.all([
+      getCachedLektionenByArea(area.id),
+      getLektionProgress(user!.id),
+      getCachedProgramById(area.program_id),
+      supabase.from("users").select("is_admin").eq("id", user!.id).single(),
+      getCachedModulesByArea(area.id),
+    ]);
 
   const passedIds = progress.filter((p) => p.passed).map((p) => p.lektion_id);
   const isAdmin = profileResult.data?.is_admin ?? false;
@@ -61,6 +64,7 @@ export default async function AreaPage({
 
       <LektionenTab
         lektionen={lektionen}
+        modules={modules}
         passedIds={passedIds}
         isAdmin={isAdmin}
         areaId={area.id}

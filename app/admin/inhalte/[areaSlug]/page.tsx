@@ -28,6 +28,7 @@ export default async function AdminAreaPage({
       ]
     : [
         { label: "Lektionen", href: `/admin/inhalte/${areaSlug}/lektionen` },
+        { label: "Module", href: `/admin/inhalte/${areaSlug}/module` },
         { label: "Tutorials", href: `/admin/inhalte/${areaSlug}/tutorials` },
         { label: "Ressourcen", href: `/admin/inhalte/${areaSlug}/ressourcen` },
       ];

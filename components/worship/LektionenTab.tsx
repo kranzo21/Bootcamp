@@ -1,10 +1,11 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import type { Lektion } from "@/types";
+import type { Lektion, Module } from "@/types";
 
 interface Props {
   lektionen: Lektion[];
+  modules: Module[];
   passedIds: string[];
   isAdmin: boolean;
   areaId: string;
@@ -75,27 +76,90 @@ function LektionCard({
   );
 }
 
+function ModulSection({
+  modul,
+  lektionen,
+  passedIds,
+  isAdmin,
+}: {
+  modul: Module;
+  lektionen: Lektion[];
+  passedIds: Set<string>;
+  isAdmin: boolean;
+}) {
+  const passedCount = lektionen.filter((l) => passedIds.has(l.id)).length;
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-base font-bold text-ink">{modul.name}</h2>
+          {modul.description && (
+            <p className="text-xs text-gray-mid mt-0.5">{modul.description}</p>
+          )}
+        </div>
+        <span className="text-xs text-gray-mid flex-shrink-0 ml-4">
+          {passedCount}/{lektionen.length}
+        </span>
+      </div>
+      {lektionen.map((l) => (
+        <LektionCard
+          key={l.id}
+          l={l}
+          passed={passedIds.has(l.id)}
+          isAdmin={isAdmin}
+        />
+      ))}
+    </div>
+  );
+}
+
 export default function LektionenTab({
   lektionen,
+  modules,
   passedIds,
   isAdmin,
   areaId,
 }: Props) {
   const passedSet = new Set(passedIds);
+  const hasModules = modules.length > 0;
+
+  const grouped = hasModules
+    ? modules.map((m) => ({
+        modul: m,
+        lektionen: lektionen.filter((l) => l.module_id === m.id),
+      }))
+    : [];
+
+  const ungrouped = lektionen.filter(
+    (l) => !hasModules || l.module_id === null,
+  );
 
   return (
-    <div className="flex flex-col gap-3">
-      {lektionen.length === 0 && (
-        <p className="text-gray-mid text-sm">Noch keine Lektionen vorhanden.</p>
-      )}
-      {lektionen.map((l) => (
-        <LektionCard
-          key={l.id}
-          l={l}
-          passed={passedSet.has(l.id)}
+    <div className="flex flex-col gap-10">
+      {grouped.map(({ modul, lektionen: ml }) => (
+        <ModulSection
+          key={modul.id}
+          modul={modul}
+          lektionen={ml}
+          passedIds={passedSet}
           isAdmin={isAdmin}
         />
       ))}
+
+      {ungrouped.length > 0 && (
+        <div className="flex flex-col gap-3">
+          {ungrouped.map((l) => (
+            <LektionCard
+              key={l.id}
+              l={l}
+              passed={passedSet.has(l.id)}
+              isAdmin={isAdmin}
+            />
+          ))}
+        </div>
+      )}
+
       {isAdmin && (
         <Link
           href={`/admin/inhalte/neu?type=lektion&areaId=${areaId}`}
