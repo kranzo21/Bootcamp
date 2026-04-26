@@ -19,6 +19,14 @@ export interface Area {
   area_type: "regular" | "instrument";
 }
 
+export interface Module {
+  id: string;
+  area_id: string;
+  name: string;
+  description: string | null;
+  order: number;
+}
+
 export interface Tutorial {
   id: string;
   area_id: string;
@@ -32,6 +40,7 @@ export interface Tutorial {
 export interface Lektion {
   id: string;
   area_id: string;
+  module_id: string | null;
   title: string;
   description: string;
   order: number;
