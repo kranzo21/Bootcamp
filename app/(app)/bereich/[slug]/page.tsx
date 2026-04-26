@@ -5,6 +5,7 @@ import {
   getCachedProgramById,
   getCachedLektionenByArea,
   getCachedModulesByArea,
+  getCachedGewächshausWalkthrough,
 } from "@/lib/db/cached";
 import { getLektionProgress } from "@/lib/db/progress";
 import Link from "next/link";
@@ -26,6 +27,8 @@ export default async function AreaPage({
   const area = await getCachedAreaBySlug(slug);
   if (!area) notFound();
 
+  const isGewächshaus = slug === "gewaechshaus";
+
   const [lektionen, progress, program, profileResult, modules] =
     await Promise.all([
       getCachedLektionenByArea(area.id),
@@ -36,7 +39,48 @@ export default async function AreaPage({
     ]);
 
   const passedIds = progress.filter((p) => p.passed).map((p) => p.lektion_id);
+  const passedSet = new Set(passedIds);
   const isAdmin = profileResult.data?.is_admin ?? false;
+
+  let walkthroughButton = null;
+  if (isGewächshaus) {
+    const { lektionen: ordered } = await getCachedGewächshausWalkthrough();
+    const completedCount = ordered.filter((l) => passedSet.has(l.id)).length;
+    const total = ordered.length;
+    const allDone = total > 0 && completedCount === total;
+    const firstIncomplete = ordered.findIndex((l) => !passedSet.has(l.id));
+    const nextSchritt = firstIncomplete + 1;
+
+    walkthroughButton = (
+      <Link
+        href={
+          allDone
+            ? "/gewächshaus/pruefung"
+            : completedCount === 0
+              ? "/gewächshaus/1"
+              : `/gewächshaus/${nextSchritt}`
+        }
+        className="w-full flex items-center justify-between bg-teal text-white px-5 py-4 rounded-2xl mb-8 hover:bg-teal/90 transition-colors"
+      >
+        <div>
+          <p className="text-[10px] uppercase tracking-[2px] opacity-70 mb-0.5">
+            Gewächshaus
+          </p>
+          <p className="font-bold text-sm">
+            {allDone
+              ? "Zur Abschlussprüfung →"
+              : completedCount === 0
+                ? "Starten →"
+                : "Weitermachen →"}
+          </p>
+        </div>
+        <span className="text-xs opacity-70">
+          {completedCount}/{total}
+          {allDone ? " ✓" : ""}
+        </span>
+      </Link>
+    );
+  }
 
   return (
     <div>
@@ -61,6 +105,8 @@ export default async function AreaPage({
           </Link>
         )}
       </div>
+
+      {walkthroughButton}
 
       <LektionenTab
         lektionen={lektionen}
