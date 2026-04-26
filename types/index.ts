@@ -38,6 +38,7 @@ export interface Lektion {
   content: string | null;
   video_url: string | null;
   video_position: "above" | "below";
+  h5p_content_path: string | null;
 }
 
 export interface Material {

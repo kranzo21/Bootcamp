@@ -1,6 +1,6 @@
 import { getCachedTutorialById } from "@/lib/db/cached";
 import { toYouTubeEmbedUrl } from "@/lib/youtube";
-import Link from "next/link";
+import BackButton from "@/components/ui/BackButton";
 import { notFound } from "next/navigation";
 
 export default async function TutorialPage({
@@ -16,12 +16,7 @@ export default async function TutorialPage({
 
   return (
     <div>
-      <Link
-        href="javascript:history.back()"
-        className="text-sm text-teal hover:underline mb-4 block"
-      >
-        ← Zurück
-      </Link>
+      <BackButton />
       <h1 className="text-2xl font-bold tracking-tight text-ink mb-1">
         {tutorial.title}
       </h1>

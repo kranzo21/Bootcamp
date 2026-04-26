@@ -8,6 +8,7 @@ import {
 import { getLektionProgress } from "@/lib/db/progress";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import LektionenTab from "@/components/worship/LektionenTab";
 
 export default async function AreaPage({
   params,
@@ -24,23 +25,14 @@ export default async function AreaPage({
   const area = await getCachedAreaBySlug(slug);
   if (!area) notFound();
 
-  const [rawLektionen, progress, program, profileResult] = await Promise.all([
+  const [lektionen, progress, program, profileResult] = await Promise.all([
     getCachedLektionenByArea(area.id),
     getLektionProgress(user!.id),
     getCachedProgramById(area.program_id),
     supabase.from("users").select("is_admin").eq("id", user!.id).single(),
   ]);
 
-  const extractNum = (title: string) =>
-    parseInt(title.match(/\d+/)?.[0] ?? "0", 10);
-  const lektionen = [...rawLektionen].sort((a, b) => {
-    const diff = extractNum(a.title) - extractNum(b.title);
-    return diff !== 0 ? diff : a.title.localeCompare(b.title, "de");
-  });
-
-  const passedIds = new Set(
-    progress.filter((p) => p.passed).map((p) => p.lektion_id),
-  );
+  const passedIds = progress.filter((p) => p.passed).map((p) => p.lektion_id);
   const isAdmin = profileResult.data?.is_admin ?? false;
 
   return (
@@ -67,48 +59,12 @@ export default async function AreaPage({
         )}
       </div>
 
-      <div className="flex flex-col gap-3">
-        {lektionen.length === 0 && (
-          <p className="text-gray-mid text-sm">
-            Noch keine Lektionen vorhanden.
-          </p>
-        )}
-        {lektionen.map((l) => (
-          <div key={l.id} className="relative">
-            <Link
-              href={`/lektion/${l.id}`}
-              className="bg-white border border-border rounded-xl p-4 hover:shadow-sm transition-shadow flex items-center justify-between"
-            >
-              <div>
-                <h3 className="font-semibold text-ink">{l.title}</h3>
-                {l.description && (
-                  <p className="text-sm text-gray-mid">{l.description}</p>
-                )}
-              </div>
-              {passedIds.has(l.id) && (
-                <span className="text-teal text-lg ml-3">✓</span>
-              )}
-            </Link>
-            {isAdmin && (
-              <Link
-                href={`/admin/inhalte/bearbeiten?type=lektion&id=${l.id}`}
-                title="Lektion bearbeiten"
-                className="absolute top-3 right-3 text-gray-mid hover:text-teal transition-colors text-xs"
-              >
-                ✏️
-              </Link>
-            )}
-          </div>
-        ))}
-        {isAdmin && (
-          <Link
-            href={`/admin/inhalte/neu?type=lektion&areaId=${area.id}`}
-            className="border border-dashed border-border rounded-xl p-4 text-center text-sm text-gray-mid hover:text-teal hover:border-teal transition-colors"
-          >
-            + Neue Lektion
-          </Link>
-        )}
-      </div>
+      <LektionenTab
+        lektionen={lektionen}
+        passedIds={passedIds}
+        isAdmin={isAdmin}
+        areaId={area.id}
+      />
     </div>
   );
 }

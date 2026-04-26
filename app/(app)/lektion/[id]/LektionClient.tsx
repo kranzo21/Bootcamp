@@ -5,6 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import type { Lektion, QuizQuestion, Badge } from "@/types";
 import { toYouTubeEmbedUrl } from "@/lib/youtube";
+import H5PPlayer from "@/components/ui/H5PPlayer";
 
 interface Props {
   lektion: Lektion;
@@ -69,12 +70,12 @@ export default function LektionClient({
   return (
     <div>
       {/* Back link */}
-      <Link
-        href="javascript:history.back()"
+      <button
+        onClick={() => window.history.back()}
         className="text-[9px] uppercase tracking-[2px] text-gray-mid hover:text-teal transition-colors mb-4 block"
       >
         ← Zurück
-      </Link>
+      </button>
 
       <h1 className="text-2xl font-bold tracking-tight text-ink mb-1">
         {lektion.title}
@@ -113,6 +114,13 @@ export default function LektionClient({
 
       {/* Video unten */}
       {lektion.video_position === "below" && videoBlock}
+
+      {/* H5P Interaktiver Inhalt */}
+      {lektion.h5p_content_path && (
+        <div className="mb-8">
+          <H5PPlayer contentPath={lektion.h5p_content_path} />
+        </div>
+      )}
 
       {/* Prüfung */}
       {questions.length > 0 && !passed && (

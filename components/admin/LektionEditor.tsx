@@ -23,6 +23,8 @@ export default function LektionEditor({ lektionId }: Props) {
   const [videoPosition, setVideoPosition] = useState<"above" | "below">(
     "above",
   );
+  const [h5pContentPath, setH5pContentPath] = useState("");
+  const [order, setOrder] = useState("0");
   const [status, setStatus] = useState<"draft" | "published">("draft");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,6 +53,8 @@ export default function LektionEditor({ lektionId }: Props) {
         setAreaId(data.area_id ?? "");
         setVideoUrl(data.video_url ?? "");
         setVideoPosition(data.video_position ?? "above");
+        setH5pContentPath(data.h5p_content_path ?? "");
+        setOrder(String(data.order ?? 0));
         setStatus(data.status ?? "published");
         if (data.content) editor.commands.setContent(data.content);
       });
@@ -71,6 +75,8 @@ export default function LektionEditor({ lektionId }: Props) {
       area_id: areaId,
       video_url: videoUrl || null,
       video_position: videoPosition,
+      h5p_content_path: h5pContentPath || null,
+      order: parseInt(order),
       content,
       status: saveStatus,
     };
@@ -166,6 +172,47 @@ export default function LektionEditor({ lektionId }: Props) {
             <option value="below">Unten (nach Text)</option>
           </select>
         </div>
+
+        {/* H5P */}
+        <div className="border border-border rounded-xl p-4 bg-gray-50">
+          <label className="block text-sm font-semibold mb-1">
+            H5P-Inhalt (optional)
+          </label>
+          <p className="text-xs text-gray-mid mb-3">
+            Erstelle H5P-Inhalte mit{" "}
+            <a
+              href="https://lumi.education"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-teal hover:underline"
+            >
+              Lumi Desktop
+            </a>
+            , exportiere als <code className="bg-white px-1 rounded">.h5p</code>
+            , entpacke den Inhalt nach{" "}
+            <code className="bg-white px-1 rounded">
+              public/h5p-content/[name]/
+            </code>{" "}
+            und trage den Pfad hier ein.
+          </p>
+          <input
+            value={h5pContentPath}
+            onChange={(e) => setH5pContentPath(e.target.value)}
+            placeholder="/h5p-content/mein-quiz"
+            className="border rounded px-3 py-2 w-full bg-white text-sm font-mono"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Reihenfolge</label>
+          <input
+            type="number"
+            value={order}
+            onChange={(e) => setOrder(e.target.value)}
+            className="border rounded px-3 py-2 w-32"
+          />
+        </div>
+
         {/* Tiptap Editor */}
         <div>
           <label className="block text-sm font-medium mb-2">Inhalt</label>
