@@ -202,3 +202,17 @@ export const getCachedProgramById = unstable_cache(
   ["program-by-id"],
   { revalidate: TTL, tags: ["programs"] },
 );
+
+export const getCachedModulesByArea = unstable_cache(
+  async (areaId: string) => {
+    const db = createAdminClient();
+    const { data } = await db
+      .from("modules")
+      .select("*")
+      .eq("area_id", areaId)
+      .order("order", { ascending: true });
+    return (data ?? []) as import("@/types").Module[];
+  },
+  ["modules-by-area"],
+  { revalidate: TTL, tags: ["modules"] },
+);
