@@ -3,7 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import H5PPlayer from "@/components/ui/H5PPlayer";
 
-const H5P_EXAM_PATH = "/h5p-content/gewächshaus-pruefung";
+const H5P_EXAM_PATH = "/h5p-content/gewaechshaus-pruefung";
 
 export default function PruefungClient() {
   const [done, setDone] = useState(false);

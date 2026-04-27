@@ -37,14 +37,14 @@ export default async function WalkthroughSchrittPage({
 
   // Vorherige Lektion muss abgeschlossen sein
   if (schritt > 1 && !passedIds.has(lektionen[schritt - 2].id)) {
-    redirect("/gewächshaus");
+    redirect("/gewaechshaus");
   }
 
   const modul = modules.find((m) => m.id === lektion.module_id);
   const isLast = schritt === lektionen.length;
   const nextHref = isLast
-    ? "/gewächshaus/pruefung"
-    : `/gewächshaus/${schritt + 1}`;
+    ? "/gewaechshaus/pruefung"
+    : `/gewaechshaus/${schritt + 1}`;
 
   return (
     <WalkthroughClient

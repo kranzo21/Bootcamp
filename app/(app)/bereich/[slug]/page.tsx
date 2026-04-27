@@ -55,10 +55,10 @@ export default async function AreaPage({
       <Link
         href={
           allDone
-            ? "/gewächshaus/pruefung"
+            ? "/gewaechshaus/pruefung"
             : completedCount === 0
-              ? "/gewächshaus/1"
-              : `/gewächshaus/${nextSchritt}`
+              ? "/gewaechshaus/1"
+              : `/gewaechshaus/${nextSchritt}`
         }
         className="w-full flex items-center justify-between bg-teal text-white px-5 py-4 rounded-2xl mb-8 hover:bg-teal/90 transition-colors"
       >
@@ -108,13 +108,15 @@ export default async function AreaPage({
 
       {walkthroughButton}
 
-      <LektionenTab
-        lektionen={lektionen}
-        modules={modules}
-        passedIds={passedIds}
-        isAdmin={isAdmin}
-        areaId={area.id}
-      />
+      {!isGewächshaus && (
+        <LektionenTab
+          lektionen={lektionen}
+          modules={modules}
+          passedIds={passedIds}
+          isAdmin={isAdmin}
+          areaId={area.id}
+        />
+      )}
     </div>
   );
 }

@@ -2,9 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getCachedGewächshausWalkthrough } from "@/lib/db/cached";
 import { getLektionProgress } from "@/lib/db/progress";
-import PruefungClient from "./PruefungClient";
 
-export default async function PruefungPage() {
+export default async function GewächshausPage() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -19,9 +18,8 @@ export default async function PruefungPage() {
     progress.filter((p) => p.passed).map((p) => p.lektion_id),
   );
 
-  const allDone =
-    lektionen.length > 0 && lektionen.every((l) => passedIds.has(l.id));
-  if (!allDone) redirect("/gewächshaus");
+  const firstIncomplete = lektionen.findIndex((l) => !passedIds.has(l.id));
 
-  return <PruefungClient />;
+  if (firstIncomplete === -1) redirect("/gewaechshaus/pruefung");
+  redirect(`/gewaechshaus/${firstIncomplete + 1}`);
 }
